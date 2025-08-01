@@ -23,7 +23,7 @@ choose_example(){
     done
 
     echo "You selected ${chosen_example}"
-
+ 
     CHOSEN_EXAMPLE_PATH=${examples_dir}/${chosen_example}
 }
 
