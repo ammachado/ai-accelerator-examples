@@ -1,4 +1,3 @@
-{{- $ingress := lookup "config.openshift.io/v1" "Ingress" "cluster" "openshift-ingress-operator" -}}
 apiVersion: apps.3scale.net/v1alpha1
 kind: APIManager
 metadata:
@@ -7,14 +6,13 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 spec:
-  wildcardDomain: '{{ $ingress.spec.domain }}'
+  wildcardDomain: '{{ .Values.wildcardDomain }}'
   resourceRequirementsEnabled: false
   tenantName: maas
   system:
     fileStorage:
-      simpleStorageService:
-        configurationSecretRef:
-          name: 3scale-s3-credentials
+      persistentVolumeClaim:
+        storageClassName: '{{ .Values.storageClassName }}'
   apicast:
     stagingSpec:
       customPolicies:

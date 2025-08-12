@@ -2,6 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: models-as-a-service
+  namespace: openshift-gitops
 spec:
   description: "Applications for the Models as a Service example"
   sourceRepos:
