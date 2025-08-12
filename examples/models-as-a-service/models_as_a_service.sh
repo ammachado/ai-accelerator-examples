@@ -17,7 +17,7 @@ check_commands() {
 prerequisite() {
     echo "--- Running prerequisite steps for Models as a Service ---"
 
-    check_commands jq yq oc git podman
+    check_commands jq yq oc git
 
     # 3scale RWX Storage check
     echo "The 3scale operator requires a storage class with ReadWriteMany (RWX) access mode."
@@ -34,12 +34,6 @@ prerequisite() {
         echo "Storage class name cannot be empty."
         read -p "Please enter the name of the RWX storage class: " rwx_storage_class
     done
-
-    VALUES_YAML_3SCALE_PATH="examples/models-as-a-service/components/3scale/values.yaml"
-
-    echo "Updating 3scale instance with storage class: ${rwx_storage_class}"
-    yq e -i '.storageClassName = "'"${rwx_storage_class}"'"' "$VALUES_YAML_3SCALE_PATH"
-    echo "File ${VALUES_YAML_3SCALE_PATH} updated."
 
     # Update ApplicationSet with current Git repo and branch
     echo "--- Updating ApplicationSet configuration ---"
@@ -64,33 +58,6 @@ prerequisite() {
     yq e -i '.spec.template.spec.source.targetRevision = "'"${CURRENT_BRANCH}"'"' "${APPLICATIONSET_YAML_PATH}"
 
     echo "ApplicationSet updated successfully."
-
-    # Commit and push changes
-    echo "--- Pushing configuration changes to Git ---"
-    read -p "Do you want to commit and push the configuration changes to your repository? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        git config --global credential.helper 'cache --timeout=3600'
-
-        git add "${VALUES_YAML_3SCALE_PATH}" "${APPLICATIONSET_YAML_PATH}"
-        
-        # Check if there are changes to commit
-        if git diff --staged --quiet; then
-            echo "No configuration changes to commit."
-        else
-            git commit -m "Update MaaS configuration for deployment"
-            echo "Pushing changes to branch '${CURRENT_BRANCH}'..."
-            if git push origin "HEAD:${CURRENT_BRANCH}"; then
-                echo "Configuration pushed to repository successfully."
-            else
-                echo "Error: Failed to push configuration to repository."
-                echo "Please check your credentials and ensure you have push permissions."
-                return 1
-            fi
-        fi
-    else
-        echo "Skipping Git push. Please commit and push the changes manually for the deployment to work correctly."
-    fi
 
     echo "--- Prerequisite steps completed. ---"
 }
