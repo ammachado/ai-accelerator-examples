@@ -2,11 +2,12 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: models-as-a-service
+  namespace: openshift-gitops
 spec:
   generators:
     - git:
-        repoURL: https://github.com/sukantadash/ai-accelerator-examples-maas.git
-        revision: main
+        repoURL: https://github.com/ammachado/ai-accelerator-examples.git
+        revision: 3scale-test
         directories:
           - path: examples/models-as-a-service/components/*
   template:
@@ -17,11 +18,16 @@ spec:
     spec:
       project: models-as-a-service
       source:
-        repoURL: https://github.com/sukantadash/ai-accelerator-examples-maas.git
-        targetRevision: main
+        repoURL: https://github.com/ammachado/ai-accelerator-examples.git
+        targetRevision: 3scale-test
         path: '{{path}}'
         helm:
           releaseName: '{{path.basename}}-release'
+          parameters:
+            - name: wildcardDomain
+              value: "WILDCARD_DOMAIN"
+            - name: storageClass
+              value: "STORAGE_CLASS"
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{path.basename}}'

@@ -9,7 +9,7 @@ ARGOCD_NS="openshift-gitops"
 
 source "$(dirname "$0")/functions.sh"
 
-choose_example(){
+choose_example() {
     examples_dir=${EXAMPLES_DIR}
 
     echo
@@ -27,7 +27,7 @@ choose_example(){
     CHOSEN_EXAMPLE_PATH=${examples_dir}/${chosen_example}
 }
 
-choose_example_option(){
+choose_example_option() {
     if [ -z "$1" ]; then
         echo "Error: No option provided to choose_example_option()"
         echo "Usage: choose_example_option <chosen_example_path>"
@@ -74,7 +74,7 @@ choose_example_option(){
     fi
 }
 
-deploy_example(){
+deploy_example() {
     if [ -z "$1" ]; then
         echo "Error: No option provided to deploy_example()"
         echo "Usage: deploy_example <chosen_example_overlay_path>"
