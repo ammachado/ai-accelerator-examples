@@ -24,6 +24,11 @@ spec:
         automated:
           prune: true
           selfHeal: true
+        managedNamespaceMetadata:
+          labels:
+            argocd.argoproj.io/managed-by: openshift-gitops
+        syncOptions:
+          - CreateNamespace=true
       source:
         repoURL: "GIT_REPO_URL"
         targetRevision: "GIT_BRANCH"
