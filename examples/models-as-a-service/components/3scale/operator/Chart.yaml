@@ -1,0 +1,6 @@
+apiVersion: v2
+name: 3scale-operator
+description: A Helm chart for deploying the 3scale operator cluster-wide
+type: application
+version: 0.1.0
+appVersion: "1.0"

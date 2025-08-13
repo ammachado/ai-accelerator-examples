@@ -1,0 +1,4 @@
+# Default values for 3scale-instance
+
+# namespace: The namespace to deploy the 3scale instance
+namespace: maas-3scale
