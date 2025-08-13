@@ -52,6 +52,27 @@ prerequisite() {
         echo "Found wildcard domain: ${WILDCARD_DOMAIN_APPS}"
     fi
 
+
+    # TODO: this secret is required by 3scale; here, for testing purposes, I'm copying one from the cluster
+    
+    # Create namespace if it doesn't exist
+    if ! oc get namespace admachad-maas-3scale &>/dev/null; then
+        echo "Creating namespace admachad-maas-3scale..."
+        oc create namespace admachad-maas-3scale && \
+            oc label namespace admachad-maas-3scale argocd.argoproj.io/managed-by=openshift-gitops
+    fi
+    
+    # Create secret only if it doesn't exist
+    if ! oc get secret threescale-registry-auth -n admachad-maas-3scale &>/dev/null; then
+        echo "Creating threescale-registry-auth secret..."
+        oc extract secret/pull-secret -n openshift-config --keys=.dockerconfigjson --to=- \
+            | grep -v .dockerconfigjson \
+            | oc create secret generic threescale-registry-auth -n admachad-maas-3scale --type=kubernetes.io/dockerconfigjson --from-file=.dockerconfigjson=/dev/stdin
+    else
+        echo "Secret threescale-registry-auth already exists in admachad-maas-3scale namespace."
+    fi
+
+
     # Save substitutions for later usage (git repo/branch handled globally)
     subs+=(
         "WILDCARD_DOMAIN=${WILDCARD_DOMAIN_APPS}"
