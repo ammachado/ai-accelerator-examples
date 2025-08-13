@@ -12,9 +12,10 @@ spec:
       restartPolicy: OnFailure
       initContainers:
       - name: clone-and-copy
-        image: registry.redhat.io/openshift4/ose-tools-rhel9@latest
-        command: ["/bin/sh", "-c"]
+        image: registry.redhat.io/openshift4/ose-tools-rhel9:latest
+        command: ["/bin/sh"]
         args:
+        - "-c"
         - |
           git clone https://github.com/rh-aiservices-bu/models-aas.git /tmp/models-aas &&
           cp -r /tmp/models-aas/deployment/3scale/portal/. /cms
