@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: models-as-a-service
+  name: maas
 spec:
   generators:
     - git:
@@ -13,9 +13,9 @@ spec:
     metadata:
       name: '{{path.basename}}'
       labels:
-        app.kubernetes.io/part-of: models-as-a-service
+        app.kubernetes.io/part-of: maas
     spec:
-      project: models-as-a-service
+      project: maas
       syncPolicy:
         automated:
           prune: true
