@@ -11,4 +11,3 @@ spec:
   source: redhat-operators
   sourceNamespace: openshift-marketplace
   installPlanApproval: Automatic
-  operatorGroup: 3scale-operator-group
