@@ -24,8 +24,8 @@ spec:
           export THREESCALE_ADMIN_HOST=$(oc get route -n {{ .Values.namespace | default "maas-3scale" }} | grep maas-admin | awk '{print $2}')
 
           mkdir -p /tmp/3scale
-          echo ${THREESCALE_ACCESS_TOKEN} > /tmp/3scale/access_token
-          echo ${THREESCALE_ADMIN_HOST} > /tmp/3scale/admin_host
+          echo ${THREESCALE_ACCESS_TOKEN} > /cms/access_token
+          echo ${THREESCALE_ADMIN_HOST} > /cms/admin_host
 
           ls -l /cms
 
@@ -38,8 +38,10 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
         - |
-          export ACCESS_TOKEN=$(cat /tmp/3scale/access_token)
-          export ADMIN_HOST=$(cat /tmp/3scale/admin_host)
+          export ACCESS_TOKEN=$(cat /cms/access_token)
+          rm /cms/access_token
+          export ADMIN_HOST=$(cat /cms/admin_host)
+          rm /cms/admin_host
 
           alias cms="java -Djava.util.logging.manager=org.jboss.logmanager.LogManager -jar /home/jboss/quarkus-run.jar"
 
