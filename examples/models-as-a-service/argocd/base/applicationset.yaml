@@ -3,6 +3,8 @@ kind: ApplicationSet
 metadata:
   name: maas
 spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
   generators:
     - git:
         repoURL: "GIT_REPO_URL"
@@ -13,7 +15,7 @@ spec:
           - path: examples/models-as-a-service/components/redhat-sso
   template:
     metadata:
-      name: '{{if contains "3scale/operator" .path}}3scale-operator{{else if contains "3scale/instance" .path}}3scale-instance{{else}}{{.path.basename}}{{end}}'
+      name: '{{"admachad-"}}{{if contains "3scale/operator" .path}}3scale-operator{{else if contains "3scale/instance" .path}}3scale-instance{{else}}{{.path.basename}}{{end}}'
       labels:
         app.kubernetes.io/part-of: maas
     spec:
@@ -25,9 +27,9 @@ spec:
       source:
         repoURL: "GIT_REPO_URL"
         targetRevision: "GIT_BRANCH"
-        path: '{{path}}'
+        path: '{{.path.path}}'
         helm:
-          releaseName: '{{if contains "3scale/operator" .path}}3scale-operator{{else if contains "3scale/instance" .path}}3scale-instance{{else}}{{.path.basename}}{{end}}-release'
+          releaseName: '{{"admachad-"}}{{if contains "3scale/operator" .path.path}}3scale-operator{{else if contains "3scale/instance" .path.path}}3scale-instance{{else}}{{.path.basename}}{{end}}-release'
           parameters:
             - name: wildcardDomain
               value: "WILDCARD_DOMAIN"
@@ -35,6 +37,5 @@ spec:
               value: "STORAGE_CLASS"
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{if contains "3scale/operator" .path}}openshift-operators{{else if contains "3scale/instance" .path}}maas-3scale{{else if eq .path.basename "redhat-sso"}}maas-redhat-sso{{else}}{{.path.basename}}{{end}}'
+        namespace: '{{"admachad-"}}{{if contains "3scale/operator" .path.path}}openshift-operators{{else if contains "3scale/instance" .path.path}}maas-3scale{{else if eq .path.basename "redhat-sso"}}maas-redhat-sso{{else}}{{.path.basename}}{{end}}'
         syncOptions:
-          - CreateNamespace=true
