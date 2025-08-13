@@ -52,32 +52,10 @@ prerequisite() {
         echo "Found wildcard domain: ${WILDCARD_DOMAIN_APPS}"
     fi
 
-    # # Update ApplicationSet with current Git repo and branch
-    # echo "--- Updating ApplicationSet configuration ---"
-    # APPLICATIONSET_YAML_PATH="examples/models-as-a-service/argocd/base/applicationset.yaml"
-    
-    # CURRENT_REPO_URL=$(git config --get remote.origin.url)
-    # CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-
-    # if [ -z "$CURRENT_REPO_URL" ] || [ -z "$CURRENT_BRANCH" ]; then
-    #     echo "Error: Could not determine current Git repository URL or branch."
-    #     echo "Please ensure you are in a valid Git repository."
-    #     return 1
-    # fi
-
-    # echo "Updating ApplicationSet to use your repository:"
-    # echo "  Repo URL: ${CURRENT_REPO_URL}"
-    # echo "  Branch: ${CURRENT_BRANCH}"
-
-    # yq e -i '.spec.generators[0].git.repoURL = "'"${CURRENT_REPO_URL}"'"' "${APPLICATIONSET_YAML_PATH}"
-    # yq e -i '.spec.generators[0].git.revision = "'"${CURRENT_BRANCH}"'"' "${APPLICATIONSET_YAML_PATH}"
-    # yq e -i '.spec.template.spec.source.repoURL = "'"${CURRENT_REPO_URL}"'"' "${APPLICATIONSET_YAML_PATH}"
-    # yq e -i '.spec.template.spec.source.targetRevision = "'"${CURRENT_BRANCH}"'"' "${APPLICATIONSET_YAML_PATH}"
-
-    # Save substitutions for later usage
-    subs=(
-        WILDCARD_DOMAIN=${WILDCARD_DOMAIN_APPS}
-        STORAGE_CLASS=${rwx_storage_class}
+    # Save substitutions for later usage (git repo/branch handled globally)
+    subs+=(
+        "WILDCARD_DOMAIN=${WILDCARD_DOMAIN_APPS}"
+        "STORAGE_CLASS=${rwx_storage_class}"
     )
 
     echo "--- Prerequisite steps completed. ---"

@@ -2,12 +2,11 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: models-as-a-service
-  namespace: openshift-gitops
 spec:
   generators:
     - git:
-        repoURL: https://github.com/ammachado/ai-accelerator-examples.git
-        revision: 3scale-test
+        repoURL: "GIT_REPO_URL"
+        revision: "GIT_BRANCH"
         directories:
           - path: examples/models-as-a-service/components/*
   template:
@@ -17,9 +16,13 @@ spec:
         app.kubernetes.io/part-of: models-as-a-service
     spec:
       project: models-as-a-service
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
       source:
-        repoURL: https://github.com/ammachado/ai-accelerator-examples.git
-        targetRevision: 3scale-test
+        repoURL: "GIT_REPO_URL"
+        targetRevision: "GIT_BRANCH"
         path: '{{path}}'
         helm:
           releaseName: '{{path.basename}}-release'
@@ -31,9 +34,5 @@ spec:
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{path.basename}}'
-      syncPolicy:
-        automated:
-          prune: true
-          selfHeal: true
         syncOptions:
           - CreateNamespace=true

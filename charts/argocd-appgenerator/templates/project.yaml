@@ -3,6 +3,11 @@ kind: AppProject
 metadata:
   name: {{ include "argocd-appgenerator.fullname" . }}
 spec:
+  sourceRepos:
+    - '*'
+  destinations:
+    - namespace: '*'
+      server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: '*'
       kind: '*'
