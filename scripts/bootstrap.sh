@@ -90,8 +90,38 @@ deploy_example() {
         | oc apply -n ${ARGOCD_NS} -f -
 }
 
+detect_git_repository() {
+    echo "--- Detecting Git repository configuration ---"
+    
+    CURRENT_REPO_URL=$(git config --get remote.origin.url)
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+    if [ -z "$CURRENT_REPO_URL" ] || [ -z "$CURRENT_BRANCH" ]; then
+        echo "Warning: Could not determine current Git repository URL or branch."
+        echo "Using default repository configuration."
+        CURRENT_REPO_URL="https://github.com/redhat-ai-services/ai-accelerator-examples.git"
+        CURRENT_BRANCH="main"
+    fi
+
+    echo "Repository configuration:"
+    echo "  Repository URL: ${CURRENT_REPO_URL}"
+    echo "  Branch: ${CURRENT_BRANCH}"
+
+    # Initialize global substitutions
+    subs+=(
+        "GIT_REPO_URL=${CURRENT_REPO_URL}"
+        "GIT_BRANCH=${CURRENT_BRANCH}"
+    )
+}
+
 main() {
     choose_example
+
+    # Initialize subs array
+    subs=()
+
+    # Always detect git repository
+    detect_git_repository
 
     if [ -f "${CHOSEN_EXAMPLE_PATH}/$chosen_example.sh" ]; then
         source "${CHOSEN_EXAMPLE_PATH}/$chosen_example.sh"
