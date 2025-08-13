@@ -70,56 +70,56 @@ post-install-steps() {
     # In production, you should ensure proper certificates are configured.
     CURL_OPTS=("-s" "-k")
 
-    # Wait for 3scale namespace to be created
+    # Wait for maas-3scale namespace to be created
     echo "Waiting for the 3scale namespace to be created..."
-    until oc get namespace 3scale &> /dev/null; do
-        echo "Namespace '3scale' not found. Waiting..."
+    until oc get namespace maas-3scale &> /dev/null; do
+        echo "Namespace 'maas-3scale' not found. Waiting..."
         sleep 10
     done
-    echo "Namespace '3scale' found."
+    echo "Namespace 'maas-3scale' found."
     
     # Wait for 3scale APIManager to be created
     echo "Waiting for 3scale APIManager to be created..."
-    until oc get apimanager/apimanager -n 3scale &> /dev/null; do
-        echo "APIManager 'apimanager' in namespace '3scale' not found. Waiting..."
+    until oc get apimanager/apimanager -n maas-3scale &> /dev/null; do
+        echo "APIManager 'apimanager' in namespace 'maas-3scale' not found. Waiting..."
         sleep 30
     done
-    echo "APIManager 'apimanager' in namespace '3scale' found."
+    echo "APIManager 'apimanager' in namespace 'maas-3scale' found."
 
-    # Wait for 3scale to be ready
-    echo "Waiting for 3scale APIManager to be ready..."
-    oc wait --for=condition=Available --timeout=15m apimanager/apimanager -n 3scale
+    # Wait for maas-3scale to be ready
+    echo "Waiting for maas-3scale APIManager to be ready..."
+    oc wait --for=condition=Available --timeout=15m apimanager/apimanager -n maas-3scale
 
-    # Get 3scale admin password
-    THREESCALE_ADMIN_PASS=$(oc get secret system-seed -n 3scale -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
-    THREESCALE_ADMIN_URL=$(oc get route -l zync.3scale.net/route-to=system-provider -n 3scale -o jsonpath='{.items[0].spec.host}')
+    # Get maas-3scale admin password
+    THREESCALE_ADMIN_PASS=$(oc get secret system-seed -n maas-3scale -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
+    THREESCALE_ADMIN_URL=$(oc get route -l zync.3scale.net/route-to=system-provider -n maas-3scale -o jsonpath='{.items[0].spec.host}')
     echo "3scale Admin URL: https://${THREESCALE_ADMIN_URL}"
     echo "3scale Admin Password: ${THREESCALE_ADMIN_PASS}"
 
 
-    # Wait for redhat-sso namespace to be created
-    echo "Waiting for the redhat-sso namespace to be created..."
-    until oc get namespace redhat-sso &> /dev/null; do
-        echo "Namespace 'redhat-sso' not found. Waiting..."
+    # Wait for maas-redhat-sso namespace to be created
+    echo "Waiting for the maas-redhat-sso namespace to be created..."
+    until oc get namespace maas-redhat-sso &> /dev/null; do
+        echo "Namespace 'maas-redhat-sso' not found. Waiting..."
         sleep 10
     done
-    echo "Namespace 'redhat-sso' found."
+    echo "Namespace 'maas-redhat-sso' found."
 
     # Wait for REDHAT-SSO Keycloak to be created
     echo "Waiting for statefulset Keycloak to be created..."
-    until oc get statefulset/keycloak -n redhat-sso &> /dev/null; do
-        echo "statefulset 'keycloak' in namespace 'redhat-sso' not found. Waiting..."
+    until oc get statefulset/keycloak -n maas-redhat-sso &> /dev/null; do
+        echo "statefulset 'keycloak' in namespace 'maas-redhat-sso' not found. Waiting..."
         sleep 30
     done
-    echo "statefulset 'keycloak' in namespace 'redhat-sso' found."
+    echo "statefulset 'keycloak' in namespace 'maas-redhat-sso' found."
 
     # Get REDHAT-SSO credentials
     echo "Waiting for statefulset 'keycloak' to be ready..."
-    oc wait --for=jsonpath='{.status.readyReplicas}'=1 statefulset/keycloak -n redhat-sso --timeout=15m
+    oc wait --for=jsonpath='{.status.readyReplicas}'=1 statefulset/keycloak -n maas-redhat-sso --timeout=15m
     
-    REDHATSSO_ADMIN_USER=$(oc get secret credential-redhat-sso -n redhat-sso -o jsonpath='{.data.ADMIN_USERNAME}' | base64 -d)
-    REDHATSSO_ADMIN_PASS=$(oc get secret credential-redhat-sso -n redhat-sso -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
-    REDHATSSO_URL=$(oc get route keycloak -n redhat-sso -o jsonpath='{.spec.host}')
+    REDHATSSO_ADMIN_USER=$(oc get secret credential-maas-redhat-sso -n maas-redhat-sso -o jsonpath='{.data.ADMIN_USERNAME}' | base64 -d)
+    REDHATSSO_ADMIN_PASS=$(oc get secret credential-maas-redhat-sso -n maas-redhat-sso -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
+    REDHATSSO_URL=$(oc get route keycloak -n maas-redhat-sso -o jsonpath='{.spec.host}')
     echo "REDHAT-SSO Admin URL: https://${REDHATSSO_URL}/auth/admin/maas/console/"
     echo "REDHAT-SSO Admin User: ${REDHATSSO_ADMIN_USER}"
     echo "REDHAT-SSO Admin Password: ${REDHATSSO_ADMIN_PASS}"
@@ -133,14 +133,14 @@ post-install-steps() {
         return 1
     fi
 
-    echo "Retrieving 3scale admin access token and host..."
-    ACCESS_TOKEN=$(oc get secret system-seed -n 3scale -o jsonpath='{.data.ADMIN_ACCESS_TOKEN}' | base64 -d)
+    echo "Retrieving maas-3scale admin access token and host..."
+    ACCESS_TOKEN=$(oc get secret system-seed -n maas-3scale -o jsonpath='{.data.ADMIN_ACCESS_TOKEN}' | base64 -d)
     if [ -z "$ACCESS_TOKEN" ]; then
         echo "Failed to retrieve 3scale access token. Please ensure the 'system-seed' secret exists in the '3scale' namespace and is populated."
         return 1
     fi
 
-    ADMIN_HOST=$(oc get route -n 3scale | grep 'maas-admin' | awk '{print $2}')
+    ADMIN_HOST=$(oc get route -n maas-3scale | grep 'maas-admin' | awk '{print $2}')
     if [ -z "$ADMIN_HOST" ]; then
         echo "Failed to retrieve 3scale admin host. Please ensure the route exists in the '3scale' namespace."
         return 1
@@ -178,17 +178,17 @@ configure_keycloak_client() {
 
     REALM="maas"
 
-    echo "Checking if client '3scale' exists in realm '${REALM}'..."
-    CLIENT_ID_3SCALE=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/clients?clientId=3scale" \
+    echo "Checking if client 'maas-3scale' exists in realm '${REALM}'..."
+    CLIENT_ID_3SCALE=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/clients?clientId=maas-3scale" \
         -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.[0].id')
 
     if [ -n "$CLIENT_ID_3SCALE" ] && [ "$CLIENT_ID_3SCALE" != "null" ]; then
-        echo "Client '3scale' already exists with ID: ${CLIENT_ID_3SCALE}. Skipping creation."
+        echo "Client 'maas-3scale' already exists with ID: ${CLIENT_ID_3SCALE}. Skipping creation."
     else
-        echo "Client '3scale' does not exist. Creating it..."
+        echo "Client 'maas-3scale' does not exist. Creating it..."
         CREATE_CLIENT_PAYLOAD=$(cat <<EOF
 {
-    "clientId": "3scale",
+    "clientId": "maas-3scale",
     "protocol": "openid-connect",
     "publicClient": false,
     "standardFlowEnabled": true,
@@ -207,14 +207,14 @@ EOF
             -H "Content-Type: application/json" \
             -d "${CREATE_CLIENT_PAYLOAD}"
 
-        CLIENT_ID_3SCALE=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/clients?clientId=3scale" \
+        CLIENT_ID_3SCALE=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/clients?clientId=maas-3scale" \
             -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.[0].id')
         
         if [ -z "$CLIENT_ID_3SCALE" ] || [ "$CLIENT_ID_3SCALE" == "null" ]; then
-            echo "Failed to create client '3scale' or retrieve its ID. Exiting."
+            echo "Failed to create client 'maas-3scale' or retrieve its ID. Exiting."
             return 1
         fi
-        echo "Client '3scale' created with ID: ${CLIENT_ID_3SCALE}."
+        echo "Client 'maas-3scale' created with ID: ${CLIENT_ID_3SCALE}."
     fi
 
     echo "Adding protocol mappers..."
@@ -361,7 +361,7 @@ configure_sso_developer_portal() {
     else
         echo "Creating RH-SSO integration..."
         local CLIENT_SECRET
-        CLIENT_SECRET=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/maas/clients/$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/maas/clients?clientId=3scale" -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.[0].id')/client-secret" -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.value')
+        CLIENT_SECRET=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/maas/clients/$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/maas/clients?clientId=maas-3scale" -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.[0].id')/client-secret" -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.value')
         if [ -z "$CLIENT_SECRET" ] || [ "$CLIENT_SECRET" == "null" ]; then
             echo "Error: CLIENT_SECRET is not set. Cannot create SSO integration."
             return 1
@@ -371,7 +371,7 @@ configure_sso_developer_portal() {
             -H "Content-Type: application/x-www-form-urlencoded" \
             -d "kind=keycloak" \
             -d "name=Red Hat Single Sign-On" \
-            -d "client_id=3scale" \
+            -d "client_id=maas-3scale" \
             -d "client_secret=${CLIENT_SECRET}" \
             -d "site=https://${REDHATSSO_URL}/auth/realms/maas" \
             -d "published=true")
