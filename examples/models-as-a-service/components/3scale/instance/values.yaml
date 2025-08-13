@@ -2,3 +2,4 @@
 
 # namespace: The namespace to deploy the 3scale instance
 namespace: admachad-maas-3scale
+storageClassName: ocs-storagecluster-cephfs
