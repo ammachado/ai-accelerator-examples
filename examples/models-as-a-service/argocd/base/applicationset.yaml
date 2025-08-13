@@ -20,15 +20,6 @@ spec:
         app.kubernetes.io/part-of: maas
     spec:
       project: maas
-      syncPolicy:
-        automated:
-          prune: true
-          selfHeal: true
-        managedNamespaceMetadata:
-          labels:
-            argocd.argoproj.io/managed-by: openshift-gitops
-        syncOptions:
-          - CreateNamespace=true
       source:
         repoURL: "GIT_REPO_URL"
         targetRevision: "GIT_BRANCH"
@@ -38,9 +29,8 @@ spec:
           parameters:
             - name: wildcardDomain
               value: "WILDCARD_DOMAIN"
-            - name: storageClass
+            - name: storageClassName
               value: "STORAGE_CLASS"
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{"admachad-"}}{{if contains "3scale/operator" .path.path}}openshift-operators{{else if contains "3scale/instance" .path.path}}maas-3scale{{else if eq .path.basename "redhat-sso"}}maas-redhat-sso{{else}}{{.path.basename}}{{end}}'
-        syncOptions:
