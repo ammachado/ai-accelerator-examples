@@ -17,8 +17,18 @@ spec:
         args:
         - "-c"
         - |
-          git clone https://github.com/rh-aiservices-bu/models-aas.git /tmp/models-aas &&
+          /usr/bin/git clone https://github.com/rh-aiservices-bu/models-aas.git /tmp/models-aas &&
           cp -r /tmp/models-aas/deployment/3scale/portal/. /cms
+
+          export THREESCALE_ACCESS_TOKEN=$(oc get secret system-seed -o json -n {{ .Values.namespace | default "maas-3scale" }} | /usr/bin/jq -r '.data.ADMIN_ACCESS_TOKEN' | base64 -d)
+          export THREESCALE_ADMIN_HOST=$(oc get route -n {{ .Values.namespace | default "maas-3scale" }} | grep maas-admin | awk '{print $2}')
+
+          mkdir -p /tmp/3scale
+          echo ${THREESCALE_ACCESS_TOKEN} > /tmp/3scale/access_token
+          echo ${THREESCALE_ADMIN_HOST} > /tmp/3scale/admin_host
+
+          ls -l /cms
+
         volumeMounts:
         - name: cms-volume
           mountPath: /cms
@@ -28,8 +38,10 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
         - |
-          export ACCESS_TOKEN=$(oc get secret system-seed -o json -n {{ .Values.namespace | default "maas-3scale" }} | jq -r '.data.ADMIN_ACCESS_TOKEN' | base64 -d)
-          export ADMIN_HOST=$(oc get route -n {{ .Values.namespace | default "maas-3scale" }} | grep maas-admin | awk '{print $2}')
+          export ACCESS_TOKEN=$(cat /tmp/3scale/access_token)
+          export ADMIN_HOST=$(cat /tmp/3scale/admin_host)
+
+          alias cms="java -Djava.util.logging.manager=org.jboss.logmanager.LogManager -jar /home/jboss/quarkus-run.jar"
 
           #echo "Clean up developer portal content... This may take a moment."
           #cms -k --access-token="${ACCESS_TOKEN}" "${ACCESS_TOKEN}" "https://${ADMIN_HOST}" delete --yes-i-really-want-to-delete-the-entire-developer-portal
