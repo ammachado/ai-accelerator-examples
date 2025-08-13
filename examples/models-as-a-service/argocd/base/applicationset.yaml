@@ -8,10 +8,12 @@ spec:
         repoURL: "GIT_REPO_URL"
         revision: "GIT_BRANCH"
         directories:
-          - path: examples/models-as-a-service/components/*
+          - path: examples/models-as-a-service/components/3scale/operator
+          - path: examples/models-as-a-service/components/3scale/instance
+          - path: examples/models-as-a-service/components/redhat-sso
   template:
     metadata:
-      name: '{{path.basename}}'
+      name: '{{if contains "3scale/operator" .path}}3scale-operator{{else if contains "3scale/instance" .path}}3scale-instance{{else}}{{.path.basename}}{{end}}'
       labels:
         app.kubernetes.io/part-of: maas
     spec:
@@ -25,7 +27,7 @@ spec:
         targetRevision: "GIT_BRANCH"
         path: '{{path}}'
         helm:
-          releaseName: '{{path.basename}}-release'
+          releaseName: '{{if contains "3scale/operator" .path}}3scale-operator{{else if contains "3scale/instance" .path}}3scale-instance{{else}}{{.path.basename}}{{end}}-release'
           parameters:
             - name: wildcardDomain
               value: "WILDCARD_DOMAIN"
@@ -33,6 +35,6 @@ spec:
               value: "STORAGE_CLASS"
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{path.basename}}'
+        namespace: '{{if contains "3scale/operator" .path}}openshift-operators{{else if contains "3scale/instance" .path}}maas-3scale{{else if eq .path.basename "redhat-sso"}}maas-redhat-sso{{else}}{{.path.basename}}{{end}}'
         syncOptions:
           - CreateNamespace=true
