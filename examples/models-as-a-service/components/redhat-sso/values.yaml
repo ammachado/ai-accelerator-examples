@@ -1,5 +1,5 @@
 # Default values for redhat-sso
-namespace: maas-redhat-sso
+namespace: admachad-maas-redhat-sso
 channel: stable
 keycloak:
   name: redhat-sso
