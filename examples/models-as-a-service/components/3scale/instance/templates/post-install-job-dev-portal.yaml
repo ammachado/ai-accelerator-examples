@@ -18,17 +18,7 @@ spec:
         - "-c"
         - |
           /usr/bin/git clone https://github.com/rh-aiservices-bu/models-aas.git /tmp/models-aas &&
-          cp -r /tmp/models-aas/deployment/3scale/portal/. /cms
-
-          export THREESCALE_ACCESS_TOKEN=$(oc get secret system-seed -o json -n {{ .Values.namespace | default "maas-3scale" }} | /usr/bin/jq -r '.data.ADMIN_ACCESS_TOKEN' | base64 -d)
-          export THREESCALE_ADMIN_HOST=$(oc get route -n {{ .Values.namespace | default "maas-3scale" }} | grep maas-admin | awk '{print $2}')
-
-          mkdir -p /tmp/3scale
-          echo ${THREESCALE_ACCESS_TOKEN} > /cms/access_token
-          echo ${THREESCALE_ADMIN_HOST} > /cms/admin_host
-
-          ls -l /cms
-
+          cp -rv /tmp/models-aas/deployment/3scale/portal/. /cms
         volumeMounts:
         - name: cms-volume
           mountPath: /cms
@@ -36,13 +26,16 @@ spec:
       - name: cms-upload
         image: ghcr.io/fwmotion/3scale-cms:latest
         command: ["/bin/sh", "-c"]
+        env:
+        - name: THREESCALE_ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: system-seed
+              key: ADMIN_ACCESS_TOKEN
+        - name: THREESCALE_ADMIN_HOST
+          value: "maas-admin.{{ .Values.wildcardDomain }}"
         args:
         - |
-          export ACCESS_TOKEN=$(cat /cms/access_token)
-          rm /cms/access_token
-          export ADMIN_HOST=$(cat /cms/admin_host)
-          rm /cms/admin_host
-
           alias cms="java -Djava.util.logging.manager=org.jboss.logmanager.LogManager -jar /home/jboss/quarkus-run.jar"
 
           #echo "Clean up developer portal content... This may take a moment."
