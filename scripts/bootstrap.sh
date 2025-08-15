@@ -16,14 +16,14 @@ choose_example() {
     echo "Choose an example you wish to deploy?"
     PS3="Please enter a number to select an example folder: "
 
-    select chosen_example in $(basename -a ${examples_dir}/*/); 
+    select chosen_example in $(basename -a ${examples_dir}/*/);
     do
     test -n "${chosen_example}" && break;
     echo ">>> Invalid Selection";
     done
 
     echo "You selected ${chosen_example}"
- 
+
     CHOSEN_EXAMPLE_PATH=${examples_dir}/${chosen_example}
 }
 

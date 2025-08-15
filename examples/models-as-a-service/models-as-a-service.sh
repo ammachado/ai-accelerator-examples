@@ -1,6 +1,15 @@
 #!/bin/bash
 set -euo pipefail
 
+# Color helpers for console output (pink and reset)
+if [ -t 1 ]; then
+    COLOR_PINK="$(printf '\033[95m')"
+    COLOR_RESET="$(printf '\033[0m')"
+else
+    COLOR_PINK=""
+    COLOR_RESET=""
+fi
+
 # This script contains prerequisite and post-install steps for the
 # Models as a Service example.
 
@@ -54,14 +63,14 @@ prerequisite() {
 
 
     # TODO: this secret is required by 3scale; here, for testing purposes, I'm copying one from the cluster
-    
+
     # Create namespace if it doesn't exist
     if ! oc get namespace admachad-maas-3scale &>/dev/null; then
         echo "Creating namespace admachad-maas-3scale..."
         oc create namespace admachad-maas-3scale && \
             oc label namespace admachad-maas-3scale argocd.argoproj.io/managed-by=openshift-gitops
     fi
-    
+
     # Create secret only if it doesn't exist
     if ! oc get secret threescale-registry-auth -n admachad-maas-3scale &>/dev/null; then
         echo "Creating threescale-registry-auth secret..."
@@ -114,8 +123,8 @@ post-install-steps() {
     # Get maas-3scale admin password
     THREESCALE_ADMIN_PASS=$(oc get secret system-seed -n maas-3scale -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
     THREESCALE_ADMIN_URL=$(oc get route -l zync.3scale.net/route-to=system-provider -n maas-3scale -o jsonpath='{.items[0].spec.host}')
-    echo "3scale Admin URL: https://${THREESCALE_ADMIN_URL}"
-    echo "3scale Admin Password: ${THREESCALE_ADMIN_PASS}"
+    echo "3scale Admin URL: ${COLOR_PINK}https://${THREESCALE_ADMIN_URL}${COLOR_RESET}"
+    echo "3scale Admin Password: ${COLOR_PINK}${THREESCALE_ADMIN_PASS}${COLOR_RESET}"
 
 
     # Wait for maas-redhat-sso namespace to be created
@@ -137,16 +146,13 @@ post-install-steps() {
     # Get REDHAT-SSO credentials
     echo "Waiting for statefulset 'keycloak' to be ready..."
     oc wait --for=jsonpath='{.status.readyReplicas}'=1 statefulset/keycloak -n maas-redhat-sso --timeout=15m
-    
+
     REDHATSSO_ADMIN_USER=$(oc get secret credential-maas-redhat-sso -n maas-redhat-sso -o jsonpath='{.data.ADMIN_USERNAME}' | base64 -d)
     REDHATSSO_ADMIN_PASS=$(oc get secret credential-maas-redhat-sso -n maas-redhat-sso -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
     REDHATSSO_URL=$(oc get route keycloak -n maas-redhat-sso -o jsonpath='{.spec.host}')
-    echo "REDHAT-SSO Admin URL: https://${REDHATSSO_URL}/auth/admin/maas/console/"
-    echo "REDHAT-SSO Admin User: ${REDHATSSO_ADMIN_USER}"
-    echo "REDHAT-SSO Admin Password: ${REDHATSSO_ADMIN_PASS}"
-    echo
-    echo "Press enter to continue REDHAT-SSO configuration steps..."
-    read
+    echo "REDHAT-SSO Admin URL: ${COLOR_PINK}https://${REDHATSSO_URL}${COLOR_RESET}"
+    echo "REDHAT-SSO Admin User: ${COLOR_PINK}${REDHATSSO_ADMIN_USER}${COLOR_RESET}"
+    echo "REDHAT-SSO Admin Password: ${COLOR_PINK}${REDHATSSO_ADMIN_PASS}${COLOR_RESET}"
 
     configure_keycloak_client
     if [ $? -ne 0 ]; then
@@ -170,11 +176,12 @@ post-install-steps() {
 
     configure_sso_developer_portal
 
-
-
     echo "--- Post-install steps completed! ---"
-    
+
     handle_model_registration_loop
+
+    # Create the developer user at the end of post-install
+    create_developer_user
 
     # Clean up the temp file if it exists
     rm -f -- "${RESPONSE_FILE-}"
@@ -303,15 +310,77 @@ EOF
         echo "Added 'org_type' mapper."
     fi
 
+    echo "--- Keycloak client configuration completed. ---"
+}
+
+refresh_keycloak_token() {
+    KEYCLOAK_TOKEN=$(curl "${CURL_OPTS[@]}" -X POST "https://${REDHATSSO_URL}/auth/realms/master/protocol/openid-connect/token" \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        -d "username=${REDHATSSO_ADMIN_USER}" \
+        -d "password=${REDHATSSO_ADMIN_PASS}" \
+        -d "grant_type=password" \
+        -d "client_id=admin-cli" | jq -r .access_token)
+    if [ -z "$KEYCLOAK_TOKEN" ] || [ "$KEYCLOAK_TOKEN" == "null" ]; then
+        echo "Failed to refresh Keycloak admin token."
+        return 1
+    fi
+}
+
+create_developer_user() {
     echo "--- Creating developer user ---"
-    USER_ID=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/users?username=developer&exact=true" \
-        -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.[0].id')
+
+    REALM="maas"
+
+    # Ensure we have a fresh token
+    refresh_keycloak_token || return 1
+
+    USERS_RESPONSE=$(curl "${CURL_OPTS[@]}" -sS -w "\n%{http_code}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/users?username=developer&exact=true" \
+        -H "Authorization: Bearer ${KEYCLOAK_TOKEN}")
+    USERS_HTTP_CODE=$(echo "${USERS_RESPONSE}" | tail -n1)
+    USERS_BODY=$(echo "${USERS_RESPONSE}" | sed '$d')
+    if [ "${USERS_HTTP_CODE}" -eq 401 ]; then
+        echo "Keycloak token expired or unauthorized. Refreshing token and retrying user lookup..."
+        refresh_keycloak_token || return 1
+        USERS_RESPONSE=$(curl "${CURL_OPTS[@]}" -sS -w "\n%{http_code}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/users?username=developer&exact=true" \
+            -H "Authorization: Bearer ${KEYCLOAK_TOKEN}")
+        USERS_HTTP_CODE=$(echo "${USERS_RESPONSE}" | tail -n1)
+        USERS_BODY=$(echo "${USERS_RESPONSE}" | sed '$d')
+    fi
+    if [ "${USERS_HTTP_CODE}" -ge 400 ] || [ -z "${USERS_BODY}" ]; then
+        echo "Failed to query Keycloak users. HTTP ${USERS_HTTP_CODE}. Response:"
+        echo "${USERS_BODY}"
+        return 1
+    fi
+    USER_ID=$(echo "${USERS_BODY}" | jq -r 'if type=="array" and length>0 then .[0].id else "" end')
+
+    # Print Developer Portal route (system-developer)
+    DEVELOPER_PORTAL_HOST=$(oc get route -n 3scale -l 'zync.3scale.net/route-to=system-developer' -o jsonpath='{.items[0].spec.host}' 2>/dev/null || true)
+    if [ -n "${DEVELOPER_PORTAL_HOST}" ]; then
+        echo "Developer Portal URL: ${COLOR_PINK}https://${DEVELOPER_PORTAL_HOST}${COLOR_RESET}"
+    else
+        echo "Developer Portal route not found in namespace '3scale'."
+    fi
 
     if [ -n "$USER_ID" ] && [ "$USER_ID" != "null" ]; then
         echo "User 'developer' already exists. Skipping creation."
-    else
-        echo "User 'developer' does not exist. Creating..."
-        CREATE_USER_PAYLOAD=$(cat <<EOF
+        # Try to read credentials from secret in 3scale namespace
+        if oc get secret developer-login-cred -n 3scale >/dev/null 2>&1; then
+            EXISTING_USER=$(oc get secret developer-login-cred -n maas-3scale -o jsonpath='{.data.username}' 2>/dev/null | base64 -d || true)
+            EXISTING_PASS=$(oc get secret developer-login-cred -n maas-3scale -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || true)
+            if [ -n "${EXISTING_USER}" ] && [ -n "${EXISTING_PASS}" ]; then
+                echo "Username: ${COLOR_PINK}${EXISTING_USER}${COLOR_RESET}"
+                echo "Password: ${COLOR_PINK}${EXISTING_PASS}${COLOR_RESET}"
+            else
+                echo "Secret 'developer-login-cred' found but missing fields."
+            fi
+        else
+            echo "Secret 'developer-login-cred' not found in namespace '3scale'."
+        fi
+        return 0
+    fi
+
+    echo "User 'developer' does not exist. Creating..."
+    CREATE_USER_PAYLOAD=$(cat <<EOF
 {
     "username": "developer",
     "enabled": true,
@@ -322,22 +391,43 @@ EOF
 }
 EOF
 )
-        curl "${CURL_OPTS[@]}" -X POST "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/users" \
-            -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" \
-            -H "Content-Type: application/json" \
-            -d "${CREATE_USER_PAYLOAD}"
+    curl "${CURL_OPTS[@]}" -X POST "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/users" \
+        -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "${CREATE_USER_PAYLOAD}"
 
-        USER_ID=$(curl "${CURL_OPTS[@]}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/users?username=developer&exact=true" \
-            -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" | jq -r '.[0].id')
-        
-        if [ -z "$USER_ID" ] || [ "$USER_ID" == "null" ]; then
-            echo "Failed to create user 'developer' or retrieve its ID."
-            return 1
-        fi
-        echo "User 'developer' created with ID: ${USER_ID}."
+    USERS_RESPONSE=$(curl "${CURL_OPTS[@]}" -sS -w "\n%{http_code}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/users?username=developer&exact=true" \
+        -H "Authorization: Bearer ${KEYCLOAK_TOKEN}")
+    USERS_HTTP_CODE=$(echo "${USERS_RESPONSE}" | tail -n1)
+    USERS_BODY=$(echo "${USERS_RESPONSE}" | sed '$d')
+    if [ "${USERS_HTTP_CODE}" -eq 401 ]; then
+        echo "Keycloak token expired or unauthorized. Refreshing token and retrying user re-query..."
+        refresh_keycloak_token || return 1
+        USERS_RESPONSE=$(curl "${CURL_OPTS[@]}" -sS -w "\n%{http_code}" -X GET "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/users?username=developer&exact=true" \
+            -H "Authorization: Bearer ${KEYCLOAK_TOKEN}")
+        USERS_HTTP_CODE=$(echo "${USERS_RESPONSE}" | tail -n1)
+        USERS_BODY=$(echo "${USERS_RESPONSE}" | sed '$d')
+    fi
+    if [ "${USERS_HTTP_CODE}" -ge 400 ] || [ -z "${USERS_BODY}" ]; then
+        echo "Failed to re-query Keycloak users after creation. HTTP ${USERS_HTTP_CODE}. Response:"
+        echo "${USERS_BODY}"
+        return 1
+    fi
+    USER_ID=$(echo "${USERS_BODY}" | jq -r 'if type=="array" and length>0 then .[0].id else "" end')
 
+    if [ -z "$USER_ID" ] || [ "$USER_ID" == "null" ]; then
+        echo "Failed to create user 'developer' or retrieve its ID."
+        return 1
+    fi
+    echo "User 'developer' created with ID: ${USER_ID}."
+
+    if command -v uuidgen >/dev/null 2>&1; then
         DEVELOPER_PASSWORD=$(uuidgen)
-        SET_PASSWORD_PAYLOAD=$(cat <<EOF
+    else
+        DEVELOPER_PASSWORD=$(head -c 18 /dev/urandom | base64 | tr -d '=+/\n' | cut -c1-16)
+    fi
+
+    SET_PASSWORD_PAYLOAD=$(cat <<EOF
 {
     "type": "password",
     "value": "${DEVELOPER_PASSWORD}",
@@ -345,17 +435,30 @@ EOF
 }
 EOF
 )
-        curl "${CURL_OPTS[@]}" -X PUT "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/users/${USER_ID}/reset-password" \
-            -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" \
-            -H "Content-Type: application/json" \
-            -d "${SET_PASSWORD_PAYLOAD}"
-        
-        echo "Password for 'developer' user has been set."
-        echo "Username: developer"
-        echo "Password: ${DEVELOPER_PASSWORD}"
-    fi
+    curl "${CURL_OPTS[@]}" -X PUT "https://${REDHATSSO_URL}/auth/admin/realms/${REALM}/users/${USER_ID}/reset-password" \
+        -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "${SET_PASSWORD_PAYLOAD}"
 
-    echo "--- Keycloak client configuration completed. ---"
+    echo "Password for 'developer' user has been set."
+    echo "Username: ${COLOR_PINK}developer${COLOR_RESET}"
+    echo "Password: ${COLOR_PINK}${DEVELOPER_PASSWORD}${COLOR_RESET}"
+
+    # Create or update the secret with developer credentials in maas-3scale namespace
+    echo "Storing developer credentials in secret 'developer-login-cred' (namespace: maas-3scale)..."
+    oc apply -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: developer-login-cred
+  namespace: 3scale
+type: Opaque
+stringData:
+  username: developer
+  password: ${DEVELOPER_PASSWORD}
+EOF
+    echo "Secret 'developer-login-cred' applied."
+
 }
 
 configure_sso_developer_portal() {
@@ -369,6 +472,31 @@ configure_sso_developer_portal() {
 
     if [[ "$HTTP_CODE" -ge 400 ]]; then
         echo "Error: Failed to get Authentication Providers. Received HTTP status ${HTTP_CODE}."
+        echo "Response from server:"
+        cat "${RESPONSE_FILE}"
+        return 1
+    fi
+
+    # Disable Developer Portal access code (make portal publicly accessible)
+    echo "Disabling Developer Portal access code..."
+    HTTP_CODE=$(curl "${CURL_OPTS[@]}" -w "%{http_code}" -o "${RESPONSE_FILE}" \
+        -X PUT "https://${ADMIN_HOST}/admin/api/provider.xml" \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        -d "access_token=${ACCESS_TOKEN}" \
+        -d "site_access_code=")
+    if [[ "$HTTP_CODE" -ge 400 ]]; then
+        echo "Error: Failed to clear Developer Portal access code. HTTP ${HTTP_CODE}."
+        echo "Response from server:"
+        cat "${RESPONSE_FILE}"
+        return 1
+    else
+        echo "Developer Portal access code removed."
+    fi
+
+    # Re-fetch authentication providers after account update
+    HTTP_CODE=$(curl "${CURL_OPTS[@]}" -w "%{http_code}" -o "${RESPONSE_FILE}" "https://${ADMIN_HOST}/admin/api/authentication_providers.xml?access_token=${ACCESS_TOKEN}")
+    if [[ "$HTTP_CODE" -ge 400 ]]; then
+        echo "Error: Failed to refresh Authentication Providers. HTTP ${HTTP_CODE}."
         echo "Response from server:"
         cat "${RESPONSE_FILE}"
         return 1
@@ -396,7 +524,7 @@ configure_sso_developer_portal() {
             -d "client_secret=${CLIENT_SECRET}" \
             -d "site=https://${REDHATSSO_URL}/auth/realms/maas" \
             -d "published=true")
-        
+
         if [[ "$HTTP_CODE" -ge 400 ]]; then
             echo "Error: Failed to create RH-SSO integration. Received HTTP status ${HTTP_CODE}."
             echo "Response from server:"
@@ -408,7 +536,7 @@ configure_sso_developer_portal() {
 
     local AUTH_PROVIDER_ID
     AUTH_PROVIDER_ID=$(curl "${CURL_OPTS[@]}" -X GET "https://${ADMIN_HOST}/admin/api/authentication_providers.xml?access_token=${ACCESS_TOKEN}" | yq -p xml -o json | jq -r '[.authentication_providers.authentication_provider?] | flatten | .[] | select(.kind? == "keycloak") | .id')
-    
+
     if [ -z "$AUTH_PROVIDER_ID" ]; then
         echo "Failed to retrieve Authentication Provider ID. Cannot update 'Always approve accounts'."
         return 1
@@ -444,7 +572,7 @@ handle_model_registration_loop() {
             echo "Model registration failed. Aborting."
             break
         fi
-        
+
         read -p "Do you want to register another model? (y/n) " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -485,7 +613,7 @@ register_model_3scale_core() {
             -d "access_token=${ACCESS_TOKEN}" \
             -d "name=${model_name}" \
             -d "private_endpoint=${model_url}")
-        
+
         HTTP_CODE=$(echo "${BACKEND_RESPONSE}" | tail -n1)
         BACKEND_BODY=$(echo "${BACKEND_RESPONSE}" | sed '$d')
         BACKEND_ID=$(echo "${BACKEND_BODY}" | jq -r '.backend_api.id')
@@ -509,7 +637,7 @@ register_model_3scale_core() {
         PRODUCT_RESPONSE=$(curl "${CURL_OPTS[@]}" -w "\n%{http_code}" -X POST "https://${ADMIN_HOST}/admin/api/services.json" \
             -d "access_token=${ACCESS_TOKEN}" \
             -d "name=${model_name}")
-            
+
         HTTP_CODE=$(echo "${PRODUCT_RESPONSE}" | tail -n1)
         PRODUCT_BODY=$(echo "${PRODUCT_RESPONSE}" | sed '$d')
         PRODUCT_ID=$(echo "${PRODUCT_BODY}" | jq -r '.service.id')
@@ -536,7 +664,7 @@ register_model_3scale_core() {
         -d "access_token=${ACCESS_TOKEN}" \
         -d "backend_api_id=${BACKEND_ID}" \
         -d "path=/")
-    
+
     HTTP_CODE=$(echo "${LINK_RESPONSE}" | tail -n1)
     LINK_BODY=$(echo "${LINK_RESPONSE}" | sed '$d')
 
@@ -572,7 +700,7 @@ register_model_3scale_core() {
         -d "access_token=${ACCESS_TOKEN}" \
         -d "friendly_name=${FRIENDLY_NAME}" \
         -d "system_name=${METHOD_SYSTEM_NAME}")
-    
+
     HTTP_CODE=$(echo "${METHOD_RESPONSE}" | tail -n1)
     METHOD_BODY=$(echo "${METHOD_RESPONSE}" | sed '$d')
     METHOD_ID=$(echo "${METHOD_BODY}" | jq -r '.method.id')
@@ -591,7 +719,7 @@ register_model_3scale_core() {
         echo "Error: Failed to get method ID for '${FRIENDLY_NAME}'."
         return 1
     fi
-    
+
     PATTERN="/v1/chat/completions"
     echo "Creating mapping rule for pattern '${PATTERN}'..."
     MAPPING_RULE_RESPONSE=$(curl "${CURL_OPTS[@]}" -w "\n%{http_code}" -X POST "https://${ADMIN_HOST}/admin/api/services/${PRODUCT_ID}/proxy/mapping_rules.json" \
@@ -600,7 +728,7 @@ register_model_3scale_core() {
         -d "pattern=${PATTERN}" \
         -d "metric_id=${METHOD_ID}" \
         -d "delta=1")
-        
+
     HTTP_CODE=$(echo "${MAPPING_RULE_RESPONSE}" | tail -n1)
     MAPPING_RULE_BODY=$(echo "${MAPPING_RULE_RESPONSE}" | sed '$d')
 
@@ -670,29 +798,68 @@ register_model_3scale_core() {
         return 1
     fi
 
+    # 5b. Service Plan Configuration (set default for automatic signup)
+    SERVICE_PLAN_NAME="Default"
+    echo "Creating service plan '${SERVICE_PLAN_NAME}'..."
+    SERVICE_PLAN_RESPONSE=$(curl "${CURL_OPTS[@]}" -w "\n%{http_code}" -X POST "https://${ADMIN_HOST}/admin/api/services/${PRODUCT_ID}/service_plans.json" \
+        -d "access_token=${ACCESS_TOKEN}" \
+        -d "name=${SERVICE_PLAN_NAME}" \
+        -d "state_event=publish")
+
+    HTTP_CODE=$(echo "${SERVICE_PLAN_RESPONSE}" | tail -n1)
+    SERVICE_PLAN_BODY=$(echo "${SERVICE_PLAN_RESPONSE}" | sed '$d')
+    if [ "$HTTP_CODE" -eq 201 ]; then
+        echo "Service plan '${SERVICE_PLAN_NAME}' created successfully."
+        SERVICE_PLAN_ID=$(echo "${SERVICE_PLAN_BODY}" | jq -r '.service_plan.id')
+    elif [ "$HTTP_CODE" -eq 422 ] && echo "${SERVICE_PLAN_BODY}" | jq -e 'tostring | contains("already")' > /dev/null; then
+        echo "Service plan '${SERVICE_PLAN_NAME}' already exists. Resolving its ID..."
+        SERVICE_PLAN_ID=$(curl "${CURL_OPTS[@]}" "https://${ADMIN_HOST}/admin/api/services/${PRODUCT_ID}/service_plans.json?access_token=${ACCESS_TOKEN}" | jq -r '.plans[] | .service_plan | select(.name == "'"${SERVICE_PLAN_NAME}"'") | .id')
+    else
+        echo "Failed to create service plan. HTTP Status: ${HTTP_CODE}. Response:"
+        echo "${SERVICE_PLAN_BODY}"
+        return 1
+    fi
+
+    if [ -z "$SERVICE_PLAN_ID" ] || [ "$SERVICE_PLAN_ID" == "null" ]; then
+        echo "Error: Could not resolve Service Plan ID."
+        return 1
+    fi
+
+    echo "Setting '${SERVICE_PLAN_NAME}' as default service plan (auto-contracted on signup)..."
+    SET_DEFAULT_RESPONSE=$(curl "${CURL_OPTS[@]}" -w "\n%{http_code}" -X PUT "https://${ADMIN_HOST}/admin/api/services/${PRODUCT_ID}/service_plans/${SERVICE_PLAN_ID}/default.json" \
+        -d "access_token=${ACCESS_TOKEN}")
+    HTTP_CODE=$(echo "${SET_DEFAULT_RESPONSE}" | tail -n1)
+    if [ "$HTTP_CODE" -ne 200 ]; then
+        echo "Failed to set default service plan. HTTP ${HTTP_CODE}. Response:"
+        echo "${SET_DEFAULT_RESPONSE}" | sed '$d'
+        return 1
+    fi
+    echo "Default service plan set."
+
     echo "Model '${model_name}' registered successfully."
 
-    read -p "Do you want to activate this new service for all existing accounts? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        activate_service_for_all_accounts "${PRODUCT_ID}"
-    fi
+    activate_service_for_all_accounts "${PRODUCT_ID}"
 }
 
 activate_service_for_all_accounts() {
     local product_id=$1
+    local plan_id_input=${2:-}
     echo "--- Activating service for all accounts ---"
 
-    # Get Plan ID for the service
-    echo "Getting application plan ID for service ${product_id}..."
+    # Resolve Plan ID for the service (use provided plan_id when given)
     local plan_id
-    plan_id=$(curl "${CURL_OPTS[@]}" "https://${ADMIN_HOST}/admin/api/services/${product_id}/application_plans.json?access_token=${ACCESS_TOKEN}" | jq -r '.plans[] | .application_plan | select(.name == "Basic") | .id')
-
-    if [ -z "$plan_id" ] || [ "$plan_id" == "null" ]; then
-        echo "Error: Could not find 'Basic' application plan for service ${product_id}."
-        return 1
+    if [ -n "${plan_id_input}" ]; then
+        plan_id="${plan_id_input}"
+        echo "Using provided application plan ID: ${plan_id} for service ${product_id}"
+    else
+        echo "Getting application plan ID for service ${product_id} (default: Basic)..."
+        plan_id=$(curl "${CURL_OPTS[@]}" "https://${ADMIN_HOST}/admin/api/services/${product_id}/application_plans.json?access_token=${ACCESS_TOKEN}" | jq -r '.plans[] | .application_plan | select(.name == "Basic") | .id')
+        if [ -z "$plan_id" ] || [ "$plan_id" == "null" ]; then
+            echo "Error: Could not find 'Basic' application plan for service ${product_id}."
+            return 1
+        fi
     fi
-    echo "Found plan ID: ${plan_id}"
+    echo "Plan ID resolved: ${plan_id}"
 
     # Get all accounts
     echo "Fetching all accounts..."
@@ -702,18 +869,18 @@ activate_service_for_all_accounts() {
     while [ "$page" -le "$total_pages" ]; do
         local accounts_response
         accounts_response=$(curl "${CURL_OPTS[@]}" "https://${ADMIN_HOST}/admin/api/accounts.json?access_token=${ACCESS_TOKEN}&page=${page}")
-        
+
         if [ "$page" -eq 1 ]; then
             total_pages=$(echo "${accounts_response}" | jq -r '.metadata.total_pages')
             if [ -z "$total_pages" ] || [ "$total_pages" == "null" ]; then
                 total_pages=1
             fi
         fi
-        
+
         local ids
         ids=$(echo "${accounts_response}" | jq -r '.accounts[].account.id')
         account_ids+=($ids)
-        
+
         ((page++))
     done
 
@@ -724,7 +891,7 @@ activate_service_for_all_accounts() {
     local fail_count=0
     for account_id in "${account_ids[@]}"; do
         echo "Processing account ID: ${account_id}"
-        
+
         # Check if the account is already subscribed
         local subscribed_plans
         subscribed_plans=$(curl "${CURL_OPTS[@]}" "https://${ADMIN_HOST}/admin/api/accounts/${account_id}/applications.json?access_token=${ACCESS_TOKEN}" | jq -r '.applications[].application.plan_id')
@@ -741,7 +908,7 @@ activate_service_for_all_accounts() {
             -d "access_token=${ACCESS_TOKEN}" \
             -d "plan_id=${plan_id}" \
             -d "name=dummy-activation-app-$(date +%s)")
-        
+
         local http_code
         http_code=$(echo "${app_response}" | tail -n1)
         local app_body
@@ -761,7 +928,7 @@ activate_service_for_all_accounts() {
         # Delete dummy application
         local delete_response
         delete_response=$(curl "${CURL_OPTS[@]}" -w "\n%{http_code}" -X DELETE "https://${ADMIN_HOST}/admin/api/accounts/${account_id}/applications/${app_id}.json?access_token=${ACCESS_TOKEN}")
-        
+
         http_code=$(echo "${delete_response}" | tail -n1)
 
         if [ "$http_code" -ne 200 ]; then
@@ -769,7 +936,7 @@ activate_service_for_all_accounts() {
         else
             echo "  Successfully activated service and deleted dummy application."
         fi
-        
+
         ((success_count++))
     done
 
@@ -777,4 +944,4 @@ activate_service_for_all_accounts() {
     echo "Successful activations: ${success_count}"
     echo "Failed activations: ${fail_count}"
     echo "--------------------------------"
-} 
+}

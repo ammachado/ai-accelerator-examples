@@ -5,10 +5,10 @@ metadata:
 spec:
   description: "Applications for the Models as a Service example"
   sourceRepos:
-    - '*'
+  - '*'
   destinations:
-    - namespace: '*'
-      server: https://kubernetes.default.svc
+  - namespace: '*'
+    server: https://kubernetes.default.svc
   clusterResourceWhitelist:
-    - group: '*'
-      kind: '*'
+  - group: '*'
+    kind: '*'
