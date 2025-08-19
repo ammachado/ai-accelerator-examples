@@ -1,0 +1,13 @@
+{{- range $model := .Values.models }}
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: ProxyConfigPromote
+metadata:
+  name: '{{ $model.name }}-promote'
+  namespace: '{{ $.Values.namespace }}'
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  productCRName: '{{ $model.name }}-product'
+  production: true
+{{- end }}

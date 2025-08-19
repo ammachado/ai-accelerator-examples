@@ -4,4 +4,8 @@ keycloak:
   name: redhat-sso
   realm:
     name: maas
-    displayName: "MaaS on RHOAI" 
+    displayName: "MaaS on RHOAI"
+
+# developerPassword: Password for the developer user account
+# If not set, defaults to "change-me-please"
+developerPassword: "change-me-please" 

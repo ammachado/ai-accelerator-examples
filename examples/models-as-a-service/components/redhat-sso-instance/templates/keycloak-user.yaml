@@ -1,0 +1,22 @@
+apiVersion: keycloak.org/v1alpha1
+kind: KeycloakUser
+metadata:
+  name: developer-user
+  namespace: '{{ .Values.namespace | default "redhat-sso" }}'
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  realmSelector:
+    matchLabels:
+      app: '{{ .Values.keycloak.name | default "redhat-sso" }}'
+  user:
+    username: "developer"
+    firstName: "John"
+    lastName: "Doe"
+    email: "user@example.com"
+    emailVerified: true
+    enabled: true
+    credentials:
+      - type: "password"
+        value: '{{ .Values.developerPassword | default "change-me-please" | quote }}'
+        temporary: false
