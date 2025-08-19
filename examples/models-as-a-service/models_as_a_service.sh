@@ -13,15 +13,6 @@ fi
 # This script contains prerequisite and post-install steps for the
 # Models as a Service example.
 
-# Function to check for required command-line tools
-check_commands() {
-    for cmd in "$@"; do
-        if ! command -v "$cmd" &> /dev/null; then
-            echo "Error: ${cmd} is not installed. Please install it to continue."
-            exit 1
-        fi
-    done
-}
 
 prerequisite() {
     echo "--- Running prerequisite steps for Models as a Service ---"
@@ -31,12 +22,6 @@ prerequisite() {
     # 3scale RWX Storage check
     echo "The 3scale operator requires a storage class with ReadWriteMany (RWX) access mode."
     echo "Red Hat OpenShift Data Foundation (ODF) is the recommended way to provide this."
-    read -p "Do you have an RWX-capable storage class available in your cluster? (y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "An RWX storage class is required. Please install OpenShift Data Foundation (ODF) or another RWX-capable storage solution and then re-run the script."
-        exit 1
-    fi
 
     # Update wildcard domain
     echo "Discovering cluster wildcard domain..."
@@ -47,7 +32,6 @@ prerequisite() {
     else
         echo "Found wildcard domain: ${WILDCARD_DOMAIN_APPS}"
     fi
-
 
     # TODO: this secret is required by 3scale; here, for testing purposes, I'm copying one from the cluster
 
@@ -68,7 +52,6 @@ prerequisite() {
         echo "Secret threescale-registry-auth already exists in 3scale namespace."
     fi
 
-
     # Save substitutions for later usage
     subs+=(
         "WILDCARD_DOMAIN=${WILDCARD_DOMAIN_APPS}"
@@ -85,26 +68,12 @@ post-install-steps() {
     # This should only be used in trusted, controlled development environments.
     # In production, you should ensure proper certificates are configured.
     CURL_OPTS=("-s" "-k")
-
-    # Wait for 3scale namespace to be created
-    echo "Waiting for the 3scale namespace to be created..."
-    until oc get namespace 3scale &> /dev/null; do
-        echo "Namespace '3scale' not found. Waiting..."
-        sleep 10
-    done
-    echo "Namespace '3scale' found."
     
     # Wait for 3scale APIManager to be created
-    echo "Waiting for 3scale APIManager to be created..."
-    until oc get apimanager/apimanager -n 3scale &> /dev/null; do
-        echo "APIManager 'apimanager' in namespace '3scale' not found. Waiting..."
-        sleep 30
-    done
-    echo "APIManager 'apimanager' in namespace '3scale' found."
-
-    # Wait for 3scale to be ready
-    echo "Waiting for 3scale APIManager to be ready..."
-    oc wait --for=condition=Available --timeout=15m apimanager/apimanager -n 3scale
+    if ! wait_for_oc_resource "apimanager" "apimanager" "3scale" "condition=Available"; then
+        echo "Error: 3scale APIManager not available. Please check the 3scale namespace and try again."
+        exit 1
+    fi
 
     # Get 3scale admin password
     THREESCALE_ADMIN_PASS=$(oc get secret system-seed -n 3scale -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
@@ -112,27 +81,12 @@ post-install-steps() {
     echo "3scale Admin URL: ${COLOR_PINK}https://${THREESCALE_ADMIN_URL}${COLOR_RESET}"
     echo "3scale Admin Password: ${COLOR_PINK}${THREESCALE_ADMIN_PASS}${COLOR_RESET}"
 
-
-    # Wait for redhat-sso namespace to be created
-    echo "Waiting for the redhat-sso namespace to be created..."
-    until oc get namespace redhat-sso &> /dev/null; do
-        echo "Namespace 'redhat-sso' not found. Waiting..."
-        sleep 10
-    done
-    echo "Namespace 'redhat-sso' found."
-
     # Wait for REDHAT-SSO Keycloak to be created
-    echo "Waiting for statefulset Keycloak to be created..."
-    until oc get statefulset/keycloak -n redhat-sso &> /dev/null; do
-        echo "statefulset 'keycloak' in namespace 'redhat-sso' not found. Waiting..."
-        sleep 30
-    done
-    echo "statefulset 'keycloak' in namespace 'redhat-sso' found."
+    if ! wait_for_oc_resource "statefulset" "keycloak" "redhat-sso" "jsonpath='{.status.readyReplicas}'=1"; then
+        echo "Error: REDHAT-SSO Keycloak not ready. Please check the redhat-sso namespace and try again."
+        exit 1
+    fi
 
-    # Get REDHAT-SSO credentials
-    echo "Waiting for statefulset 'keycloak' to be ready..."
-    oc wait --for=jsonpath='{.status.readyReplicas}'=1 statefulset/keycloak -n redhat-sso --timeout=15m
-    
     REDHATSSO_ADMIN_USER=$(oc get secret credential-redhat-sso -n redhat-sso -o jsonpath='{.data.ADMIN_USERNAME}' | base64 -d)
     REDHATSSO_ADMIN_PASS=$(oc get secret credential-redhat-sso -n redhat-sso -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
     REDHATSSO_URL=$(oc get route keycloak -n redhat-sso -o jsonpath='{.spec.host}')
@@ -147,21 +101,31 @@ post-install-steps() {
         return 1
     fi
 
-    ADMIN_HOST=$(oc get route -n 3scale | grep 'maas-admin' | awk '{print $2}')
+    ADMIN_HOST=$(oc get route -l zync.3scale.net/route-to=system-provider -o jsonpath='{.items[0].spec.host}' 2>/dev/null || true)
     if [ -z "$ADMIN_HOST" ]; then
         echo "Failed to retrieve 3scale admin host. Please ensure the route exists in the '3scale' namespace."
         return 1
     fi
     echo "Found 3scale admin host: ${ADMIN_HOST}"
 
-    configure_sso_developer_portal
+    # if ! configure_sso_developer_portal; then
+    #     echo "Error: Failed to configure SSO developer portal. Please check the 3scale namespace and try again."
+    #     exit 1
+    # fi
 
     echo "--- Post-install steps completed! ---"
     
-    show_developer_portal_info
+    if ! show_developer_portal_info; then
+        echo "Error: Failed to show developer portal information. Please check the 3scale namespace and try again."
+        exit 1
+    fi
 
     # Clean up the temp file if it exists
-    rm -f -- "${RESPONSE_FILE-}"
+    if [ -n "${RESPONSE_FILE-}" -a -f "${RESPONSE_FILE-}" ]; then
+        rm -f -- "${RESPONSE_FILE-}"
+    fi
+
+    return 0
 }
 
 show_developer_portal_info() {
@@ -173,6 +137,7 @@ show_developer_portal_info() {
         echo "Developer Portal URL: ${COLOR_PINK}https://${DEVELOPER_PORTAL_HOST}${COLOR_RESET}"
     else
         echo "Developer Portal route not found in namespace '3scale'."
+        exit 1
     fi
 
     # Try to read credentials from secret in 3scale namespace
