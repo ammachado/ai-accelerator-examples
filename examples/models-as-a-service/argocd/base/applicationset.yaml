@@ -6,7 +6,7 @@ spec:
   goTemplate: true
   generators:
     - git:
-        repoURL: https://github.com/redhat-ai-services/ai-accelerator-examples.git
+        repoURL: https://github.com/ammachado/ai-accelerator-examples.git
         revision: maas
         directories:
           - path: examples/models-as-a-service/components/*
@@ -18,7 +18,7 @@ spec:
     spec:
       project: models-as-a-service
       source:
-        repoURL: https://github.com/redhat-ai-services/ai-accelerator-examples.git
+        repoURL: https://github.com/ammachado/ai-accelerator-examples.git
         targetRevision: maas
         path: '{{ .path.path }}'
         helm:
