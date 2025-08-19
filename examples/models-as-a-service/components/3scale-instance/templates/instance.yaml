@@ -11,8 +11,9 @@ spec:
   tenantName: maas
   system:
     fileStorage:
-      persistentVolumeClaim:
-        storageClassName: {{ .Values.storageClassName }}
+      simpleStorageService:
+        configurationSecretRef:
+          name: minio-s3-auth
   apicast:
     stagingSpec:
       customPolicies:
