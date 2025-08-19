@@ -1,0 +1,15 @@
+{{- range $model := .Values.models }}
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: Backend
+metadata:
+  name: '{{ $model.name }}-backend'
+  namespace: '{{ $.Values.namespace }}'
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  name: '{{ $model.name }}'
+  systemName: '{{ $model.name | replace " " "-" | lower }}'
+  privateBaseURL: '{{ $model.url }}'
+  description: 'Backend for {{ $model.name }} model'
+{{- end }}

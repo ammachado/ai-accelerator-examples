@@ -7,4 +7,14 @@ namespace: 3scale
 storageClassName: ocs-storagecluster-cephfs
 
 # wildcardDomain: The cluster apps wildcard domain. If not set or set to the placeholder, a post-install job will try to detect it automatically from Routes.
-wildcardDomain: "Needtopatchit" 
+wildcardDomain: "Needtopatchit"
+
+# models: List of AI models to be registered with 3scale
+# This replaces the interactive model registration from the script
+models:
+  - name: "granite-3b-code-instruct"
+    url: "https://granite-3b-code-instruct.vllm-granite.svc.cluster.local"
+
+# developerPassword: Password for the developer user account
+# If not set, defaults to "change-me-please"
+developerPassword: "change-me-please" 
