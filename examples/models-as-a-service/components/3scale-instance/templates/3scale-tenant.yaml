@@ -1,0 +1,18 @@
+apiVersion: capabilities.3scale.net/v1alpha1
+kind: Tenant
+metadata:
+  name: apidev
+  namespace: '{{ .Values.namespace }}'
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  email: apidev@hml.com
+  organizationName: apidev
+  username: admin
+  systemMasterUrl: "http://system-master:3000"
+  masterCredentialsRef:
+    name: system-seed
+  passwordCredentialsRef:
+    name: tenant-apidev-admin
+  tenantSecretRef:
+    name: tenant-apidev

@@ -3,6 +3,6 @@ kind: Namespace
 metadata:
   name: '{{ .Values.namespace | default "3scale" }}'
   annotations:
-    argocd.argoproj.io/sync-wave: "-1" 
-  labels:  
+    argocd.argoproj.io/sync-wave: "-1"
+  labels:
     argocd.argoproj.io/managed-by: openshift-gitops

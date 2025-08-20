@@ -5,6 +5,7 @@ metadata:
   namespace: '{{ .Values.namespace | default "3scale" }}'
   annotations:
     "helm.sh/hook": "post-install,post-upgrade"
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
     "helm.sh/hook-weight": "6"
 spec:
   template:

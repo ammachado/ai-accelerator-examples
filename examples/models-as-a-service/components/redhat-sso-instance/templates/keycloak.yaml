@@ -1,13 +1,35 @@
-apiVersion: keycloak.org/v1alpha1
+apiVersion: k8s.keycloak.org/v2alpha1
 kind: Keycloak
 metadata:
   name: '{{ .Values.keycloak.name | default "redhat-sso" }}'
   namespace: '{{ .Values.namespace | default "redhat-sso" }}'
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "10"
   labels:
     app: '{{ .Values.keycloak.name | default "redhat-sso" }}'
 spec:
-  externalAccess:
+  instances: 1
+  startOptimized: false
+  db:
+    vendor: postgres
+    host: postgres-db
+    usernameSecret:
+      name: keycloak-db-secret
+      key: username
+    passwordSecret:
+      name: keycloak-db-secret
+      key: password
+  ingress:
     enabled: true
-  instances: 1 
+    className: openshift-default
+  proxy:
+    headers: xforwarded
+  hostname:
+    hostname: 'https://{{ .Values.keycloak.name | default "redhat-sso" }}-{{ .Values.namespace | default "redhat-sso" }}.{{ .Values.wildcardDomain }}'
+    backchannelDynamic: true
+    strict: false
+  http:
+    tlsSecret: keycloak-tls-cert
+  additionalOptions:
+    - name: http-management-relative-path
+      value: /management

@@ -35,4 +35,3 @@ endpoint:
     # -- Creates service accounts with permissions to access the secured endpoint
     serviceAccounts:
       - name: maas-granite-3-2-2b
-    

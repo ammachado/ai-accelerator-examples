@@ -15,5 +15,3 @@ models:
 # developerPassword: Password for the developer user account
 # If not set, defaults to "change-me-please"
 developerPassword: "change-me-please"
-
-minio: {}

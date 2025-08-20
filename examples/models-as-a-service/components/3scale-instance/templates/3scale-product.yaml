@@ -1,0 +1,89 @@
+{{- range $model := .Values.models }}
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: Product
+metadata:
+  name: 'product-{{ $model.name }}'
+  namespace: '{{ $.Values.namespace }}'
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  name: '{{ $model.name }}'
+  systemName: '{{ $model.name | replace " " "-" | lower }}'
+  description: "MaaSAPI Product for {{ $model.name }} model"
+  deployment:
+    apicastHosted:
+      authentication:
+        # userkey:
+        #   authUserKey: Authorization
+        #   credentials: headers
+        oidc:
+          issuerType: "keycloak"
+          issuerEndpoint: "https://3scale:myclientsecret@mykeycloack.example.com/auth/realms/maas"
+          # issuerEndpointRef:
+          #   name: issuer-endpoint-secret
+          authenticationFlow:
+            standardFlowEnabled: false
+            implicitFlowEnabled: true
+            serviceAccountsEnabled: true
+            directAccessGrantsEnabled: true
+          jwtClaimWithClientID: "azp"
+          jwtClaimWithClientIDType: "plain"
+
+  policies:
+    - name: "cors"
+      version: "builtin"
+      enabled: true
+      configuration:
+        allow_methods:
+          - "GET"
+          - "POST"
+          - "DELETE"
+          - "PUT"
+          - "PATCH"
+          - "HEAD"
+          - "OPTIONS"
+        allow_credentials: true
+        allow_origin: "*"
+        allow_headers:
+          - "Authorization"
+          - "Content-type"
+          - "Accept"
+
+    - name: llm-metrics
+      version: "0.1"
+      enabled: true
+
+    - name: "apicast"
+      version: "builtin"
+      enabled: true
+      configuration:
+        someAttr: "999"
+
+  metrics:
+    hits:
+      description: Number of API hits
+      friendlyName: Hits
+      unit: hit
+    llm-metrics:
+      description: LLM metrics
+      friendlyName: LLM Metrics
+      unit: metric
+
+  methods:
+    '{{ $model.name | replace " " "-" | lower }}-chat-completions':
+      friendlyName: '{{ $model.name | replace " " "-" | lower }} chat completions'
+      description: "Chat completions endpoint for {{ $model.name }}"
+
+  mappingRules:
+    - httpMethod: POST
+      pattern: "/v1/chat/completions"
+      metricMethodRef: '{{ $model.name | replace " " "-" | lower }}-chat-completions'
+      increment: 1
+      last: true
+
+  applicationPlans:
+    basic:
+      name: "Basic"
+      setupFee: "0.00"
+{{- end }}

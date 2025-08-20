@@ -8,6 +8,6 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "5"
 spec:
-  productCRName: '{{ $model.name }}-product'
+  productCRName: 'product-{{ $model.name }}'
   production: true
 {{- end }}

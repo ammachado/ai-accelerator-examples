@@ -2,11 +2,11 @@ apiVersion: apps.3scale.net/v1alpha1
 kind: APIManager
 metadata:
   name: apimanager
-  namespace: {{ .Values.namespace }}
+  namespace: '{{ .Values.namespace }}'
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: ""
 spec:
-  wildcardDomain: {{ .Values.wildcardDomain }}
+  wildcardDomain: '{{ .Values.wildcardDomain }}'
   resourceRequirementsEnabled: false
   tenantName: maas
   system:
@@ -20,10 +20,10 @@ spec:
         - name: llm-metrics
           version: "0.1"
           secretRef:
-             name: llm-metrics
+            name: llm-metrics
     productionSpec:
       customPolicies:
         - name: llm-metrics
           version: "0.1"
           secretRef:
-             name: llm-metrics 
+            name: llm-metrics

@@ -2,7 +2,7 @@ kind: CustomPolicyDefinition
 apiVersion: capabilities.3scale.net/v1beta1
 metadata:
   name: llm-metrics
-  namespace: {{ .Values.namespace }}
+  namespace: '{{ .Values.namespace }}'
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 spec:
@@ -18,4 +18,4 @@ spec:
     name: LLM Monitor
     summary: Expose prometheus metrics to monitor LLM token usage
     version: '0.1'
-  version: '0.1' 
+  version: '0.1'
