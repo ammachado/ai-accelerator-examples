@@ -109,14 +109,14 @@ post-install-steps() {
     echo "3scale Admin Password: ${COLOR_PINK}${THREESCALE_ADMIN_PASS}${COLOR_RESET}"
 
     # Wait for REDHAT-SSO Keycloak to be created
-    if ! wait_for_oc_resource "statefulset" "keycloak" "redhat-sso" "jsonpath='{.status.readyReplicas}'=1"; then
+    if ! wait_for_oc_resource "statefulset" "redhat-sso" "redhat-sso" "jsonpath={.status.readyReplicas}=1"; then
         echo "Error: REDHAT-SSO Keycloak not ready. Please check the redhat-sso namespace and try again."
         exit 1
     fi
 
-    REDHATSSO_ADMIN_USER=$(oc get secret credential-redhat-sso -n redhat-sso -o jsonpath='{.data.ADMIN_USERNAME}' | base64 -d)
-    REDHATSSO_ADMIN_PASS=$(oc get secret credential-redhat-sso -n redhat-sso -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)
-    REDHATSSO_URL=$(oc get route keycloak -n redhat-sso -o jsonpath='{.spec.host}')
+    REDHATSSO_ADMIN_USER=$(oc get secret redhat-sso-initial-admin -n redhat-sso -o jsonpath='{.data.username}' | base64 -d)
+    REDHATSSO_ADMIN_PASS=$(oc get secret redhat-sso-initial-admin -n redhat-sso -o jsonpath='{.data.password}' | base64 -d)
+    REDHATSSO_URL=$(oc get route -l app.kubernetes.io/instance=redhat-sso -n redhat-sso -o jsonpath='{.items[0].spec.host}')
     echo "REDHAT-SSO Admin URL: ${COLOR_PINK}https://${REDHATSSO_URL}${COLOR_RESET}"
     echo "REDHAT-SSO Admin User: ${COLOR_PINK}${REDHATSSO_ADMIN_USER}${COLOR_RESET}"
     echo "REDHAT-SSO Admin Password: ${COLOR_PINK}${REDHATSSO_ADMIN_PASS}${COLOR_RESET}"
@@ -128,17 +128,17 @@ post-install-steps() {
         return 1
     fi
 
-    ADMIN_HOST=$(oc get route -l zync.3scale.net/route-to=system-provider -o jsonpath='{.items[0].spec.host}' 2>/dev/null || true)
+    ADMIN_HOST=$(oc get route -l zync.3scale.net/route-to=system-provider -n 3scale -o jsonpath='{.items[0].spec.host}' 2>/dev/null || true)
     if [ -z "$ADMIN_HOST" ]; then
         echo "Failed to retrieve 3scale admin host. Please ensure the route exists in the '3scale' namespace."
         return 1
     fi
     echo "Found 3scale admin host: ${ADMIN_HOST}"
 
-    # if ! configure_sso_developer_portal; then
-    #     echo "Error: Failed to configure SSO developer portal. Please check the 3scale namespace and try again."
-    #     exit 1
-    # fi
+    if ! configure_sso_developer_portal; then
+        echo "Error: Failed to configure SSO developer portal. Please check the 3scale namespace and try again."
+        exit 1
+    fi
 
     echo "--- Post-install steps completed! ---"
     
@@ -157,7 +157,7 @@ post-install-steps() {
 
 show_developer_portal_info() {
     echo "--- Developer Portal Information ---"
-    
+
     # Print Developer Portal route (system-developer)
     DEVELOPER_PORTAL_HOST=$(oc get route -n 3scale -l 'zync.3scale.net/route-to=system-developer' -o jsonpath='{.items[0].spec.host}' 2>/dev/null || true)
     if [ -n "${DEVELOPER_PORTAL_HOST}" ]; then
@@ -250,7 +250,7 @@ configure_sso_developer_portal() {
             -d "client_secret=${CLIENT_SECRET}" \
             -d "site=https://${REDHATSSO_URL}/auth/realms/maas" \
             -d "published=true")
-        
+
         if [[ "$HTTP_CODE" -ge 400 ]]; then
             echo "Error: Failed to create RH-SSO integration. Received HTTP status ${HTTP_CODE}."
             echo "Response from server:"
@@ -262,7 +262,7 @@ configure_sso_developer_portal() {
 
     local AUTH_PROVIDER_ID
     AUTH_PROVIDER_ID=$(curl "${CURL_OPTS[@]}" -X GET "https://${ADMIN_HOST}/admin/api/authentication_providers.xml?access_token=${ACCESS_TOKEN}" | yq -p xml -o json | jq -r '[.authentication_providers.authentication_provider?] | flatten | .[] | select(.kind? == "keycloak") | .id')
-    
+
     if [ -z "$AUTH_PROVIDER_ID" ]; then
         echo "Failed to retrieve Authentication Provider ID. Cannot update 'Always approve accounts'."
         return 1

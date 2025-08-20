@@ -14,11 +14,11 @@ spec:
     vendor: postgres
     host: postgres-db
     usernameSecret:
-      name: keycloak-db-secret
-      key: username
+      name: postgres-credentials
+      key: POSTGRES_USER
     passwordSecret:
-      name: keycloak-db-secret
-      key: password
+      name: postgres-credentials
+      key: POSTGRES_PASSWORD
   ingress:
     enabled: true
     className: openshift-default
