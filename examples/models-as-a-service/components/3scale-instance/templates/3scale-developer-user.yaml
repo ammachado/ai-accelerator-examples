@@ -12,18 +12,6 @@ spec:
   lastName: Doe
   role: member
   passwordCredentialsRef:
-    name: developer-login-cred
+    name: developer-user
   developerAccountRef:
     name: developer-account
----
-apiVersion: capabilities.3scale.net/v1beta1
-kind: DeveloperAccount
-metadata:
-  name: developer-account
-  namespace: '{{ .Values.namespace }}'
-  annotations:
-    argocd.argoproj.io/sync-wave: "6"
-spec:
-  orgName: "Example Organization"
-  monthlyBillingEnabled: false
-  monthlyChargingEnabled: false

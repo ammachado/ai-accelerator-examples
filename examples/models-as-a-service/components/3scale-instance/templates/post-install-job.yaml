@@ -2,9 +2,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: apimanager-watcher-job
-  namespace: {{ .Values.namespace | default "3scale" }}
+  namespace: '{{ .Values.namespace | default "3scale" }}'
   annotations:
+    argocd.argoproj.io/sync-options: Force=true,Replace=true
     "helm.sh/hook": "post-install,post-upgrade"
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
     "helm.sh/hook-weight": "5"
 spec:
   template:
@@ -22,4 +24,4 @@ spec:
       - name: scripts
         configMap:
           name: apimanager-watcher-script
-          defaultMode: 0777 
+          defaultMode: 0777

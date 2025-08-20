@@ -35,7 +35,7 @@ prerequisite() {
 
     # TODO: this secret is required by 3scale; here, for testing purposes, I'm copying one from the cluster
 
-    # Create namespace if it doesn't exist
+    # Create the 3scale namespace if it doesn't exist
     if ! oc get namespace 3scale &>/dev/null; then
         echo "Creating namespace 3scale..."
         oc create namespace 3scale && \
@@ -48,9 +48,36 @@ prerequisite() {
         oc extract secret/pull-secret -n openshift-config --keys=.dockerconfigjson --to=- \
             | grep -v .dockerconfigjson \
             | oc create secret generic threescale-registry-auth -n 3scale --type=kubernetes.io/dockerconfigjson --from-file=.dockerconfigjson=/dev/stdin
+
+        oc annotate secret/threescale-registry-auth -n 3scale \
+            argocd.argoproj.io/sync-options="Prune=false" \
+            argocd.argoproj.io/compare-options="IgnoreExtraneous"
     else
         echo "Secret threescale-registry-auth already exists in 3scale namespace."
     fi
+
+    # Extract the default ingress certificate
+    local DEFAULT_INGRESS_CERTIFICATE
+    DEFAULT_INGRESS_CERTIFICATE=$(oc get ingresscontroller/default -n openshift-ingress-operator -o jsonpath='{.spec.defaultCertificate.name}')
+
+    # Create the redhat-sso namespace if it doesn't exist
+    if ! oc get namespace redhat-sso &>/dev/null; then
+        echo "Creating namespace redhat-sso..."
+        oc create namespace redhat-sso && \
+            oc label namespace redhat-sso argocd.argoproj.io/managed-by=openshift-gitops
+    fi
+
+    # Create the secret to serve the Keycloak TLS certificate
+    oc create secret generic keycloak-tls-cert \
+        --from-file=tls.crt=<(oc get secret $DEFAULT_INGRESS_CERTIFICATE -n openshift-ingress -o jsonpath='{.data.tls\.crt}' | base64 -d) \
+        --from-file=tls.key=<(oc get secret $DEFAULT_INGRESS_CERTIFICATE -n openshift-ingress -o jsonpath='{.data.tls\.key}' | base64 -d) \
+        --namespace=redhat-sso \
+        --type="kubernetes.io/tls"
+
+    oc annotate secret/keycloak-tls-cert \
+        -n redhat-sso \
+        argocd.argoproj.io/sync-options="Prune=false" \
+        argocd.argoproj.io/compare-options="IgnoreExtraneous"
 
     # Save substitutions for later usage
     subs+=(
@@ -141,19 +168,19 @@ show_developer_portal_info() {
     fi
 
     # Try to read credentials from secret in 3scale namespace
-    if oc get secret developer-login-cred -n 3scale >/dev/null 2>&1; then
-        EXISTING_USER=$(oc get secret developer-login-cred -n 3scale -o jsonpath='{.data.username}' 2>/dev/null | base64 -d || true)
-        EXISTING_PASS=$(oc get secret developer-login-cred -n 3scale -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || true)
+    if oc get secret developer-user -n 3scale >/dev/null 2>&1; then
+        EXISTING_USER=$(oc get secret developer-user -n 3scale -o jsonpath='{.data.username}' 2>/dev/null | base64 -d || true)
+        EXISTING_PASS=$(oc get secret developer-user -n 3scale -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || true)
         if [ -n "${EXISTING_USER}" ] && [ -n "${EXISTING_PASS}" ]; then
             echo "Developer User Credentials:"
             echo "Username: ${COLOR_PINK}${EXISTING_USER}${COLOR_RESET}"
             echo "Password: ${COLOR_PINK}${EXISTING_PASS}${COLOR_RESET}"
         else
-            echo "Secret 'developer-login-cred' found but missing fields."
+            echo "Secret 'developer-user' found but missing fields."
             echo "Developer user will be created by the operator-managed YAML manifests."
         fi
     else
-        echo "Secret 'developer-login-cred' not found in namespace '3scale'."
+        echo "Secret 'developer-user' not found in namespace '3scale'."
         echo "Developer user will be created by the operator-managed YAML manifests."
     fi
 }

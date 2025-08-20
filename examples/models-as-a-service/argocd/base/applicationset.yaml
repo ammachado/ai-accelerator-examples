@@ -2,6 +2,9 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: models-as-a-service
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: Prune=false
 spec:
   goTemplate: true
   generators:
@@ -13,6 +16,9 @@ spec:
   template:
     metadata:
       name: '{{ .path.basename }}'
+      annotations:
+        argocd.argoproj.io/compare-options: IgnoreExtraneous
+        argocd.argoproj.io/sync-options: Prune=false
       labels:
         app.kubernetes.io/part-of: models-as-a-service
     spec:
@@ -36,3 +42,4 @@ spec:
         syncOptions:
           - SkipDryRunOnMissingResource=true
           - PruneLast=true
+          - ApplyOutOfSyncOnly=true

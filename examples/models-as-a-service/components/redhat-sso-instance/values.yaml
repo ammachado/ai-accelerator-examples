@@ -3,9 +3,9 @@ namespace: redhat-sso
 keycloak:
   name: redhat-sso
   realm:
-    name: maas
+    name: 3scale-maas
     displayName: "MaaS on RHOAI"
 
 # developerPassword: Password for the developer user account
 # If not set, defaults to "change-me-please"
-developerPassword: "change-me-please" 
+developerPassword: "change-me-please"
