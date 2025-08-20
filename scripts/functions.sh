@@ -46,7 +46,7 @@ wait_for_oc_resource() {
 
 
     echo "Waiting for $resource_type/$resource_name in namespace $namespace to to meet condition '$condition'..."
-    until oc wait --for="$condition" "$resource_type"/"$resource_name" -n "$namespace" --timeout="$timeout_seconds"
+    until oc wait --for=$condition "$resource_type"/"$resource_name" -n "$namespace" --timeout="$timeout_seconds"
     do
         echo "Resource haven't met '$condition' yet. Retrying in 5 seconds..." >&2 # Direct retry messages to stderr
         sleep 5

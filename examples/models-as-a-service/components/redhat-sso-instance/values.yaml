@@ -6,6 +6,5 @@ keycloak:
     name: 3scale-maas
     displayName: "MaaS on RHOAI"
 
-# developerPassword: Password for the developer user account
-# If not set, defaults to "change-me-please"
-developerPassword: "change-me-please"
+# wildcardDomain: The cluster apps wildcard domain. If not set or set to the placeholder, a post-install job will try to detect it automatically from Routes.
+wildcardDomain: "Needtopatchit"
