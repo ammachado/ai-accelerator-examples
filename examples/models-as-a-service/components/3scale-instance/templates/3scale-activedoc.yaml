@@ -1,0 +1,31 @@
+{{- range $model := .Values.models }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: '{{ $model.name }}-openapi'
+  namespace: '{{ $.Values.namespace }}'
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+type: Opaque
+data: 
+  '{{ $model.name }}-openapi.yaml': '{{ tpl ($.Files.Get "files/vllm-openapi.yaml") $model | toYaml | b64enc }}'
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: ActiveDoc
+metadata:
+  name: '{{ $model.name }}'
+  namespace: '{{ $.Values.namespace }}'
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  name: "{{ $model.name }}"
+  activeDocOpenAPIRef:
+    secretRef:
+      name: '{{ $model.name }}-openapi'
+  skipSwaggerValidations: true
+  productSystemName: '{{ $model.name | replace " " "-" | lower }}'
+  published: true
+{{- end }}

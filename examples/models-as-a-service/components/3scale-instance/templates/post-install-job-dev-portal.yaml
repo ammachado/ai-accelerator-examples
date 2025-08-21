@@ -4,9 +4,10 @@ metadata:
   name: 3scale-dev-portal-deploy
   namespace: '{{ .Values.namespace | default "3scale" }}'
   annotations:
+    "argocd.argoproj.io/sync-wave": "9999"
     "helm.sh/hook": "post-install,post-upgrade"
     "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
-    "helm.sh/hook-weight": "6"
+    "helm.sh/hook-weight": "9999"
 spec:
   template:
     spec:

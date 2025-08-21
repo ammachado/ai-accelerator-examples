@@ -1,16 +1,19 @@
 {{- range $model := .Values.models }}
 ---
 apiVersion: capabilities.3scale.net/v1beta1
-kind: Backend
+kind: Application
 metadata:
   name: '{{ $model.name }}'
   namespace: '{{ $.Values.namespace }}'
   annotations:
-    "argocd.argoproj.io/sync-wave": "5"
+    "argocd.argoproj.io/sync-wave": "9"
     "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true"
 spec:
   name: '{{ $model.name }}'
-  systemName: '{{ $model.name | replace " " "-" | lower }}'
-  privateBaseURL: '{{ $model.url }}'
-  description: 'MaaS API Backend for {{ $model.name }} LLM model'
+  description: "Default application for {{ $model.name }} LLM model"
+  applicationPlanName: standard
+  productCR:
+    name: '{{ $model.name }}'
+  accountCR:
+    name: 'developer'
 {{- end }}
