@@ -12,11 +12,10 @@ operator:
   installPlanApproval: Automatic
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  # startingCSV: 3scale-operator.x.y.z
 
 apimanager:
   name: apimanager
-  wildcardDomain: apps.cluster-guid.guid.sandbox.opentlc.com
+  wildcardDomain: apps.cluster-mqtlb.mqtlb.sandbox160.opentlc.com
   tenantName: default
   # llmMetrics:
   #   name: llm-metrics
