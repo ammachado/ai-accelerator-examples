@@ -2,7 +2,7 @@
 nameOverride: ""
 fullnameOverride: ""
 
-repoURL: "https://github.com/redhat-ai-services/ai-accelerator-examples.git"
+repoURL: "https://github.com/ammachado/ai-accelerator-examples.git"
 revision: main
 
 directories: []
