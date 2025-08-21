@@ -1,7 +1,7 @@
 # reference values.yaml:
 # https://raw.githubusercontent.com/redhat-ai-services/helm-charts/refs/heads/main/charts/vllm-kserve/values.yaml
 
-fullnameOverride: maas-granite-3-2-2b
+fullnameOverride: maas-granite-3-3-2b-i
 
 model:
 
@@ -34,4 +34,4 @@ endpoint:
 
     # -- Creates service accounts with permissions to access the secured endpoint
     serviceAccounts:
-      - name: maas-granite-3-2-2b
+      - name: maas-granite-3-3-2b-i

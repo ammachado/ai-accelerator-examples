@@ -9,8 +9,8 @@ wildcardDomain: "Needtopatchit"
 # models: List of AI models to be registered with 3scale
 # This replaces the interactive model registration from the script
 models:
-  - name: "granite-3b-code-instruct"
-    url: "https://maas-granite-3-2-2b.maas.svc.cluster.local"
+  - name: "granite-3-3-2b-instruct"
+    url: "https://maas-granite-3-3-2b-i.model-as-a-service.svc.cluster.local"
 
 # developerPassword: Password for the developer user account
 # If not set, defaults to "change-me-please"
