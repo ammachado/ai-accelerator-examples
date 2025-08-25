@@ -32,6 +32,12 @@ users:
     password: openshift
     service: llama-32-1b-instruct-cpu
 
+keycloaks:
+  keycloak-maas:
+    realm: 3scale
+    clientId: 3scale-client
+    clientSecret: 3scale-client-secret
+
 patcher:
   name: 3scale-patcher
   namespace: 3scale
