@@ -8,8 +8,8 @@ metadata:
 spec:
   generators:
   - git:
-      repoURL: {{ .Values.repoURL }}
-      revision: {{ .Values.revision }}
+      repoURL: '{{ .Values.repoURL }}'
+      revision: '{{ .Values.revision }}'
       directories:
         {{- toYaml .Values.directories | nindent 8 }}
   template:
@@ -19,9 +19,9 @@ spec:
         argocd.argoproj.io/compare-options: IgnoreExtraneous
         argocd.argoproj.io/sync-options: Prune=false
       labels:
-        example: {{ include "argocd-appgenerator.fullname" . }}
+        example: '{{ include "argocd-appgenerator.fullname" . }}'
     spec:
-      project: {{ include "argocd-appgenerator.fullname" . }}
+      project: '{{ include "argocd-appgenerator.fullname" . }}'
       syncPolicy:
         automated:
           prune: false
@@ -33,8 +33,14 @@ spec:
             factor: 2
             maxDuration: 20m
       source:
-        repoURL: {{ .Values.repoURL }}
-        targetRevision: {{ .Values.revision }}
+        repoURL: '{{ .Values.repoURL }}'
+        targetRevision: '{{ .Values.revision }}'
         path: '{{`{{path}}`}}'
+        helm:
+          parameters:
+            - name: repoURL
+              value: '{{ .Values.repoURL }}'
+            - name: revision
+              value: '{{ .Values.revision }}'
       destination:
         server: https://kubernetes.default.svc
