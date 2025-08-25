@@ -44,23 +44,36 @@ spec:
             secretKeyRef:
               name: 3scale-maas-tenant-secret
               key: token
----
-{{- end }}
-
+# ---
 # apiVersion: capabilities.3scale.net/v1beta1
 # kind: Application
 # metadata:
-#   name: alice
+#   name: '{{ .name }}'
 #   namespace: 3scale
 #   annotations:
-#     # argocd.argoproj.io/sync-wave: "1"
+#     argocd.argoproj.io/sync-wave: "99"
 #     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-#     argocd.argoproj.io/hook: PostSync
 # spec:
-#   name: alice
-#   description: "Default application for user"
+#   name: '{{ .name }}'
+#   description: "Application for {{ .name }}"
 #   applicationPlanName: standard
 #   productCR:
-#     name: granite-3dot2-8b-instruct
+#     name:'{{ .service }}'
 #   accountCR:
-#     name: "alice-account"
+#     name: "{{ .name }}"
+# ---
+# apiVersion: capabilities.3scale.net/v1beta1
+# kind: ApplicationAuth
+# metadata:
+#   name: applicationauth-sample
+#   annotations:
+#     argocd.argoproj.io/sync-wave: "100"
+#     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+# spec:
+#   applicationCRName: '{{ .name }}'
+#   generateSecret: true
+#   authSecretRef:
+#     name: '{{ .name }}-auth'
+#   providerAccountRef:
+#     name: 3scale-maas-tenant-secret
+{{- end }}

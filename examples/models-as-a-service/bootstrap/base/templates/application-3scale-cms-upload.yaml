@@ -7,19 +7,19 @@ metadata:
 spec:
   project: models-as-a-service
   source:
-    repoURL: {{ .Values.cmsUpload.repoURL }}
-    targetRevision: {{ .Values.cmsUpload.targetRevision }}
-    path: {{ .Values.cmsUpload.path }}
+    repoURL: '{{ .Values.cmsUpload.repoURL }}'
+    targetRevision: '{{ .Values.cmsUpload.targetRevision }}'
+    path: '{{ .Values.cmsUpload.path }}'
     helm:
       values: |
         hook:
           pre:
-            hostPattern: maas-admin.{{ .Values.deployer.domain }}
+            hostPattern: 'maas-admin.{{ .Values.deployer.domain }}'
         git:
-          repo: {{ .Values.cmsUpload.repoURL }}
-          ref: {{ .Values.cmsUpload.targetRevision }}
+          repo: '{{ .Values.cmsUpload.repoURL }}'
+          ref: '{{ .Values.cmsUpload.targetRevision }}'
         cms:
-          contextDir: {{ .Values.cmsUpload.contextDir }}/devportal
+          contextDir: '{{ .Values.cmsUpload.contextDir }}/devportal'
   destination:
     server: https://kubernetes.default.svc
     namespace: 3scale

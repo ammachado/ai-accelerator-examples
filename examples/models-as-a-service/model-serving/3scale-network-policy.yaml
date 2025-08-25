@@ -6,15 +6,10 @@ metadata:
   annotations:
     argocd.argoproj.io/managed-by: openshift-gitops
 spec:
-  podSelector: {}
   ingress:
     - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: 3scale
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: lls-demo
-        - podSelector: {}
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: 3scale
   policyTypes:
     - Ingress
