@@ -42,8 +42,7 @@ spec:
         serviceAccountName: pipeline
         workspaces:
           - name: working-dir
-            persistentVolumeClaim:
-              claimName: workspace-upload-cms-pvc
+            emptyDir: {}
           - name: provider-details
             secret:
               secretName: 3scale-maas-tenant-secret
