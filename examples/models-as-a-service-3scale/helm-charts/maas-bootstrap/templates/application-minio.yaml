@@ -16,4 +16,17 @@ spec:
   destination:
     namespace: {{ .Values.minio.namespace }}
     server: https://kubernetes.default.svc
-{{- end }}
+    namespace: minio
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - SkipDryRunOnMissingResource=true
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: minio
+      jsonPointers:
+        - /data/AWS_ACCESS_KEY_ID
+        - /data/AWS_SECRET_ACCESS_KEY
+        - /stringData/AWS_ACCESS_KEY_ID
+        - /stringData/AWS_SECRET_ACCESS_KEY

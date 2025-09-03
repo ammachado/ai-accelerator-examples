@@ -2,11 +2,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+namespace: llm-hosting
+
 labels:
   - pairs:
-      component: aiworkshop
-      rhoai-example: maas-3scale
-      rhoai-example-component: minio-instance
+      rhoai-example: maas
+      rhoai-example-component: model-serving
 
 resources:
   - namespace.yaml

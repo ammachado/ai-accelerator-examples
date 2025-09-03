@@ -12,6 +12,11 @@ labels:
 resources:
   - namespace.yaml
 
+labels:
+  - pairs:
+      rhoai-example: maas
+      rhoai-example-component: minio
+
 helmCharts:
   - name: minio
     releaseName: minio-release

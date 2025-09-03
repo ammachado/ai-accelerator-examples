@@ -14,16 +14,21 @@ spec:
     path: {{ .Values.cmsUpload.path }}
     helm:
       valuesObject:
-        hook:
-          pre:
-            hostPattern: '{{ .Values.apimanager.tenantName }}-admin.{{ .Values.clusterDomainUrl }}'
-        git:
-          repo: {{ .Values.repoURL }}
-          ref: {{ .Values.targetRevision }}
-        cms:
+        cmsUpload:
           contextDir: {{ .Values.cmsUpload.contextDir }}/devportal
+          image: {{ .Values.cmsUpload.image }}
+          command: {{ .Values.cmsUpload.command }}
+      parameters:
+        - name: clusterDomainUrl
+          value: {{ .Values.clusterDomainUrl }}
+        - name: repoURL
+          value: {{ .Values.repoURL }}
+        - name: targetRevision
+          value: {{ .Values.targetRevision }}
   destination:
     server: https://kubernetes.default.svc
     namespace: 3scale
   syncPolicy:
     automated: {}
+    syncOptions:
+      - SkipDryRunOnMissingResource=true

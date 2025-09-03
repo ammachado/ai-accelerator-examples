@@ -10,5 +10,4 @@ rules:
   comments-indentation: disable
 
 ignore:
-  - "**/charts/"
   - "**/templates/**"

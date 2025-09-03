@@ -45,9 +45,8 @@ spec:
     script: >
       #!/bin/bash
 
-      set -eu
-
       # Don't `set -x` because that would expose credentials to the log
+      set -eu
 
       if [ -r "${PROVIDER_DETAILS_PATH}/insecure" ]; then
         INSECURE_FLAG="--insecure=$(<"${PROVIDER_DETAILS_PATH}/insecure")"

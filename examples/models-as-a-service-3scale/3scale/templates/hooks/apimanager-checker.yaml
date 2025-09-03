@@ -1,50 +1,51 @@
+{{ if .Values.apimanagerChecker -}}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: get-3scale-secret
+  name: {{ .Values.apimanagerChecker.name }}
   namespace: {{ .Values.namespace }}
   annotations:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
     argocd.argoproj.io/sync-wave: "{{ .Values.apimanagerChecker.syncwave }}"
   labels:
-    {{- include "cms-upload.labels" . | nindent 4 }}
+    {{- include "3scale.labels" . | nindent 4 }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: get-3scale-secret
+  name: {{ .Values.apimanagerChecker.name }}
   annotations:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
     argocd.argoproj.io/sync-wave: "{{ .Values.apimanagerChecker.syncwave }}"
   labels:
-    {{- include "cms-upload.labels" . | nindent 4 }}
+    {{- include "3scale.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
 subjects:
 - kind: ServiceAccount
-  name: get-3scale-secret
+  name: {{ .Values.apimanagerChecker.name }}
   namespace: {{ .Values.namespace }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: get-3scale-secret
+  name: {{ .Values.apimanagerChecker.name }}
   namespace: {{ .Values.namespace }}
   annotations:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
     argocd.argoproj.io/sync-wave: "{{ .Values.apimanagerChecker.syncwave }}"
   labels:
-    {{- include "cms-upload.labels" . | nindent 4 }}
+    {{- include "3scale.labels" . | nindent 4 }}
 data:
   playbook.yaml: |
     ---
-    - name: get 3scale secret
+    - name: apimanager status checker
       hosts: localhost
       connection: local
       gather_facts: false
@@ -67,52 +68,23 @@ data:
           - r_apimanager.resources[0].status.deployments.ready is defined
           - r_apimanager.resources[0].status.deployments.starting is not defined
           - r_apimanager.resources[0].status.deployments.stopped is not defined
-        - name: Wait for system-seed secret in the 3scale namespace
-          kubernetes.core.k8s_info:
-            kind: Secret
-            namespace: {{ .Values.namespace }}
-            name: system-seed
-            namespace: "{{ .Values.namespace }}"
-          register: system_seed_secret
-          until: system_seed_secret.resources | length > 0
-          retries: 10
-          delay: 5
-        - name: Extract and decode ADMIN_ACCESS_TOKEN and TENANT_NAME from system-seed
-          ansible.builtin.set_fact:
-            admin_access_token: '{{ "{{" }} system_seed_secret.resources[0].data.ADMIN_ACCESS_TOKEN | b64decode {{ "}}" }}'
-            tenant_name: '{{ "{{" }} system_seed_secret.resources[0].data.TENANT_NAME | b64decode {{ "}}" }}'
-        - name: Create 3scale-maas-tenant-secret secret with the extracted token
-          kubernetes.core.k8s:
-            state: present
-            definition:
-              apiVersion: v1
-              kind: Secret
-              metadata:
-                name: 3scale-maas-tenant-secret
-                namespace: {{ .Values.namespace }}
-              labels:
-                apimanager.apps.3scale.net/watched-by: apimanager
-              type: Opaque
-              stringData:
-                adminURL: "https://{{ "{{" }} tenant_name {{ "}}" }}-admin.{{ $.Values.wildcardDomain }}"
-                token: '{{ "{{" }} admin_access_token {{ "}}" }}'
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: get-3scale-secret
+  name: {{ .Values.apimanagerChecker.name }}
   namespace: {{ .Values.namespace }}
   annotations:
     argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
     argocd.argoproj.io/sync-wave: "{{ .Values.apimanagerChecker.syncwave }}"
   labels:
-    {{- include "cms-upload.labels" . | nindent 4 }}
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   backoffLimit: 3
   template:
     spec:
-      serviceAccountName: get-3scale-secret
+      serviceAccountName: {{ .Values.apimanagerChecker.name }}
       restartPolicy: Never
       containers:
       - name: ansible
@@ -125,4 +97,5 @@ spec:
       volumes:
       - name: ansible
         configMap:
-          name: get-3scale-secret
+          name: {{ .Values.apimanagerChecker.name }}
+{{- end }}

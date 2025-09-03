@@ -16,13 +16,8 @@ spec:
     path: {{ .Values.llmaas.path }}
   destination:
     server: https://kubernetes.default.svc
+    namespace: llm-hosting
   syncPolicy:
     automated: {}
     syncOptions:
-      - RespectIgnoreDifferences=true
-  ignoreDifferences:
-    - group: ""
-      kind: Secret
-      jsonPointers:
-        - /data/issuerEndpoint
-        - /stringData/issuerEndpoint
+      - SkipDryRunOnMissingResource=true

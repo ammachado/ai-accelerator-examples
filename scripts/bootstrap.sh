@@ -13,7 +13,7 @@ choose_example(){
     examples_dir=${EXAMPLES_DIR}
 
     echo
-    echo "Choose an example you wish to deploy?"
+    echo "Choose an example you wish to deploy? "
     PS3="Please enter a number to select an example folder: "
 
     select chosen_example in $(basename -a ${examples_dir}/*/); 
@@ -39,17 +39,19 @@ choose_example_kustomize_option(){
 
     # Find the first directory matching the pattern ${chosen_example_path}/*/overlays
     overlays_parent_dir=$(find "${chosen_example_path}" -mindepth 2 -maxdepth 2 -type d -name "overlays" | head -n 1)
-    
+
     if [ -n "$overlays_parent_dir" ]; then
         overlays_dir="$overlays_parent_dir"
-        
+
         echo "Found overlays directory: ${overlays_dir}"
-        
+
         overlay_count=$(find "$overlays_dir" -mindepth 1 -maxdepth 1 -type d | wc -l)
         if [ "$overlay_count" -gt 1 ]; then
             # multiple overlay options found
             # let the user choose which one to deploy
             echo "Multiple overlay options found in ${overlays_dir}:"
+            PS3="Choose an option you wish to deploy? "
+            select chosen_option in $(find "${overlays_dir}/" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort);
             PS3="Choose an option you wish to deploy?"
             select chosen_option in $(basename -a ${overlays_dir}/*/);
             do
@@ -131,6 +133,7 @@ set_repo_url(){
     # Save as a helm parameter for later usage
     helm_params+=(
         ["GIT_REPO"]="${GIT_REPO}"
+        ["repoURL"]="${GIT_REPO}"
     )
 }
 
@@ -152,6 +155,7 @@ set_repo_branch(){
     # Save as a helm parameter for later usage
     helm_params+=(
         ["GIT_BRANCH"]="${GIT_BRANCH}"
+        ["targetRevision"]="${GIT_BRANCH}"
     )
 }
 
@@ -161,6 +165,7 @@ main(){
 
     set_repo_url
     set_repo_branch
+
     choose_example
     choose_example_kustomize_option "${CHOSEN_EXAMPLE_PATH}"
     deploy_example  "${CHOSEN_EXAMPLE_PATH}" "${CHOSEN_EXAMPLE_OPTION_PATH}"
