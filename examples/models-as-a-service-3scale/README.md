@@ -30,7 +30,6 @@ Before you begin, ensure you have the following:
     *   `git`
     *   `jq`
     *   `yq`
-    *   `podman`
 
 Note: A quick way to get most of this configured via gitops is to use the [ai-accelerator](https://github.com/redhat-ai-services/ai-accelerator) github project. The Openshift Gitops operator and RHOAI and related operators are configured for you out of the box. However, ODF operator along with a suitable storage system must be applied to the cluster prior to running the ai-accelerator project bootstrapping or you can tweak the ai-accelerator kustomize files or the ai-accelerator bootstrap script so that ODF/StorageSystem gets deployed prior to other MaaS components binding to persistent volumes.
 

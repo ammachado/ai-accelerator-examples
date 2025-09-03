@@ -1,9 +1,9 @@
+APIcast
+APIs
 Analytics
 ApiManager
 ApplicationSet
 ApplicationSets
-APIcast
-APIs
 ArgoCD
 Backend
 Backends
@@ -15,6 +15,7 @@ Gzip
 ImageStream
 Jupyter
 KServe
+Keycloak
 Kubeflow
 Kubernetes
 Kustomize
@@ -25,11 +26,11 @@ MaaS
 MinIO
 ModelCar
 Multinode
-Pre
-ODF
 OCP
+ODF
 OpenAI
 OpenShift
+Pre
 Qwen
 RBAC
 README
@@ -39,6 +40,7 @@ RawDeployment
 ReadWriteMany
 Repo
 Repos
+SSO
 Serverless
 ServiceMesh
 StorageSystem
