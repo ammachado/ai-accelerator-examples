@@ -13,6 +13,13 @@ spec:
     targetRevision: {{ .Values.targetRevision }}
     path: {{ .Values.threeScale.path }}
     helm:
+      parameters:
+        - name: clusterDomainUrl
+          value: '{{ .Values.clusterDomainUrl }}'
+        - name: repoURL
+          value: '{{ .Values.repoURL }}'
+        - name: targetRevision
+          value: '{{ .Values.targetRevision }}'
       valueFiles:
         - values.yaml
         - values-apis.yaml
