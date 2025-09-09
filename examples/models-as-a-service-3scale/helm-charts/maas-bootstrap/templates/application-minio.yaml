@@ -16,7 +16,6 @@ spec:
   destination:
     namespace: {{ .Values.minio.namespace }}
     server: https://kubernetes.default.svc
-    namespace: minio
   syncPolicy:
     automated: {}
     syncOptions:
