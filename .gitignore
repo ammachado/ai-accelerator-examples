@@ -5,8 +5,7 @@ manifest.yaml
 venv/
 dictionary.dic
 tmp/
-**/charts/
-!/charts/
+charts/*.tgz
 .vscode/
 
 # Sealed secret key
