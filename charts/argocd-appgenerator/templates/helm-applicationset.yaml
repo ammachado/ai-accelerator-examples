@@ -37,10 +37,16 @@ spec:
         targetRevision: {{ .Values.targetRevision }}
         path: '{{`{{path}}`}}'
         helm:
+          parameters:
+            # These are passed as parameters to take precedence over
+            # `values.yaml`, `valuesObject` and `values` definitions elsewhere
+            - name: clusterDomainUrl
+              value: {{ .Values.clusterDomainUrl }}
+            - name: repoURL
+              value: {{ .Values.repoURL }}
+            - name: targetRevision
+              value: {{ .Values.targetRevision }}
           values: |
-            clusterDomainUrl: {{ .Values.clusterDomainUrl }}
-            repoUrl: {{ .Values.repoURL }}
-            targetRevision: {{ .Values.targetRevision }}
             namespace: {{ .Release.Namespace }}
       destination:
         server: https://kubernetes.default.svc

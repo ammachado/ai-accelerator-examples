@@ -12,15 +12,14 @@ operator:
   installPlanApproval: Automatic
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  # startingCSV: 3scale-operator.x.y.z
 
 apimanager:
   name: apimanager
   wildcardDomain: apps.cluster-guid.guid.sandbox.opentlc.com
-  tenantName: default
-  # llmMetrics:
-  #   name: llm-metrics
-  #   version: 0.1
+  tenantName: maas
+  llmMetrics:
+    name: llm-metrics
+    version: 0.1
 
 apimanagerChecker:
   name: "apimanager-checker"
@@ -28,31 +27,19 @@ apimanagerChecker:
   retries: 60
   delay: 5
 
-# Add 3scale APIs here.
-# This will configure the Product, Backend and ActiveDocs.
-# It promotes them to production.
-# apis:
-#   - name: one
-#     activeDocOpenAPIRef: https://unknown/openapi.json
-#     backend:
-#       privateBaseURL: http://service.namespace.svc.cluster.local:8080
-#       path: /
-#   - name: other
-#     activeDocOpenAPIRef: https://unknown/openapi.json
-
 users:
-  - name: user1
+  - name: dev1
     password: openshift
-    service: granite-3dot2-8b-instruct
+    service: llama-32-1b-instruct-cpu
 
 patcher:
   name: 3scale-patcher
   namespace: 3scale
-  # routes:
-  #   label_selectors:
-  #   - "zync.3scale.net/route-to=apicast-production"
-  #   annotations:
-  #     haproxy.router.openshift.io/timeout: "180s"
+  routes:
+    label_selectors:
+    - "zync.3scale.net/route-to=apicast-production"
+    annotations:
+      haproxy.router.openshift.io/timeout: "180s"
 
 images:
   multicloud: quay.io/agnosticd/ee-multicloud:v0.1.2

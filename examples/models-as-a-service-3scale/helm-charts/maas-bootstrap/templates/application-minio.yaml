@@ -1,3 +1,4 @@
+{{ if not .Values.threeScale.storageClassName -}}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -17,3 +18,4 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: minio
+{{- end }}

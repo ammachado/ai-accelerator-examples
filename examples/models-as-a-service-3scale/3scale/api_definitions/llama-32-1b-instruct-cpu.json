@@ -1,5 +1,5 @@
 {
-    "openapi": "3.1.0",
+    "openapi": "3.0.0",
     "info": {
         "title": "llama-3.2-1b-instruct",
         "version": "1.0.0",
@@ -1019,7 +1019,9 @@
           "properties": {
             "role": {
               "type": "string",
-              "const": "assistant",
+              "enum": [
+                "assistant"
+              ],
               "title": "Role"
             },
             "audio": {
@@ -1028,7 +1030,7 @@
                   "$ref": "#/components/schemas/Audio"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ]
             },
@@ -1051,7 +1053,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Content"
@@ -1062,7 +1064,7 @@
                   "$ref": "#/components/schemas/FunctionCall"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ]
             },
@@ -1076,7 +1078,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Refusal"
@@ -1102,7 +1104,9 @@
             },
             "type": {
               "type": "string",
-              "const": "audio_url",
+              "enum": [
+                "audio_url"
+              ],
               "title": "Type"
             }
           },
@@ -1131,7 +1135,9 @@
             },
             "type": {
               "type": "string",
-              "const": "image_embeds",
+              "enum": [
+                "image_embeds"
+              ],
               "title": "Type"
             }
           },
@@ -1149,7 +1155,9 @@
             },
             "type": {
               "type": "string",
-              "const": "image_url",
+              "enum": [
+                "image_url"
+              ],
               "title": "Type"
             }
           },
@@ -1167,7 +1175,9 @@
             },
             "type": {
               "type": "string",
-              "const": "input_audio",
+              "enum": [
+                "input_audio"
+              ],
               "title": "Type"
             }
           },
@@ -1186,7 +1196,9 @@
             },
             "type": {
               "type": "string",
-              "const": "refusal",
+              "enum": [
+                "refusal"
+              ],
               "title": "Type"
             }
           },
@@ -1205,7 +1217,9 @@
             },
             "type": {
               "type": "string",
-              "const": "text",
+              "enum": [
+                "text"
+              ],
               "title": "Type"
             }
           },
@@ -1223,7 +1237,9 @@
             },
             "type": {
               "type": "string",
-              "const": "video_url",
+              "enum": [
+                "video_url"
+              ],
               "title": "Type"
             }
           },
@@ -1252,7 +1268,9 @@
             },
             "role": {
               "type": "string",
-              "const": "developer",
+              "enum": [
+                "developer"
+              ],
               "title": "Role"
             },
             "name": {
@@ -1275,7 +1293,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Content"
@@ -1286,7 +1304,9 @@
             },
             "role": {
               "type": "string",
-              "const": "function",
+              "enum": [
+                "function"
+              ],
               "title": "Role"
             }
           },
@@ -1309,7 +1329,9 @@
             },
             "type": {
               "type": "string",
-              "const": "function",
+              "enum": [
+                "function"
+              ],
               "title": "Type"
             }
           },
@@ -1342,7 +1364,9 @@
             },
             "type": {
               "type": "string",
-              "const": "function",
+              "enum": [
+                "function"
+              ],
               "title": "Type",
               "default": "function"
             }
@@ -1391,7 +1415,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Model"
@@ -1402,7 +1426,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Frequency Penalty",
@@ -1417,7 +1441,7 @@
                   "type": "object"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Logit Bias"
@@ -1428,7 +1452,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Logprobs",
@@ -1440,7 +1464,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Top Logprobs",
@@ -1452,7 +1476,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Max Tokens",
@@ -1464,7 +1488,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Max Completion Tokens"
@@ -1475,7 +1499,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "N",
@@ -1487,7 +1511,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Presence Penalty",
@@ -1502,7 +1526,7 @@
                   "$ref": "#/components/schemas/StructuralTagResponseFormat"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Response Format"
@@ -1515,7 +1539,7 @@
                   "minimum": -9.223372036854776e+18
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Seed"
@@ -1532,7 +1556,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Stop",
@@ -1544,7 +1568,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Stream",
@@ -1556,7 +1580,7 @@
                   "$ref": "#/components/schemas/StreamOptions"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ]
             },
@@ -1566,7 +1590,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Temperature"
@@ -1577,7 +1601,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Top P"
@@ -1591,7 +1615,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Tools"
@@ -1600,21 +1624,17 @@
               "anyOf": [
                 {
                   "type": "string",
-                  "const": "none"
-                },
-                {
-                  "type": "string",
-                  "const": "auto"
-                },
-                {
-                  "type": "string",
-                  "const": "required"
+                  "enum": [
+                    "none",
+                    "auto",
+                    "required"
+                  ]
                 },
                 {
                   "$ref": "#/components/schemas/ChatCompletionNamedToolChoiceParam"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Tool Choice",
@@ -1626,7 +1646,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Parallel Tool Calls",
@@ -1638,7 +1658,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "User"
@@ -1649,7 +1669,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Best Of"
@@ -1665,7 +1685,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Top K"
@@ -1676,7 +1696,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Min P"
@@ -1687,7 +1707,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Repetition Penalty"
@@ -1706,7 +1726,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Stop Token Ids",
@@ -1744,7 +1764,7 @@
                   "minimum": 1
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Truncate Prompt Tokens"
@@ -1755,7 +1775,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Prompt Logprobs"
@@ -1769,7 +1789,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Allowed Token Ids"
@@ -1810,7 +1830,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Documents",
@@ -1822,7 +1842,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Chat Template",
@@ -1835,7 +1855,7 @@
                   "type": "object"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Chat Template Kwargs",
@@ -1848,7 +1868,7 @@
                   "type": "object"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Mm Processor Kwargs",
@@ -1867,7 +1887,7 @@
                   "$ref": "#/components/schemas/BaseModel"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Guided Json",
@@ -1879,7 +1899,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Guided Regex",
@@ -1894,7 +1914,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Guided Choice",
@@ -1906,7 +1926,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Guided Grammar",
@@ -1918,7 +1938,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Structural Tag",
@@ -1930,7 +1950,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Guided Decoding Backend",
@@ -1942,7 +1962,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Guided Whitespace Pattern",
@@ -1975,7 +1995,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Logits Processors",
@@ -1987,7 +2007,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Return Tokens As Token Ids",
@@ -1999,7 +2019,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Cache Salt",
@@ -2012,7 +2032,7 @@
                   "type": "object"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Kv Transfer Params",
@@ -2044,7 +2064,9 @@
             },
             "role": {
               "type": "string",
-              "const": "system",
+              "enum": [
+                "system"
+              ],
               "title": "Role"
             },
             "name": {
@@ -2077,7 +2099,9 @@
             },
             "role": {
               "type": "string",
-              "const": "tool",
+              "enum": [
+                "tool"
+              ],
               "title": "Role"
             },
             "tool_call_id": {
@@ -2097,7 +2121,9 @@
           "properties": {
             "type": {
               "type": "string",
-              "const": "function",
+              "enum": [
+                "function"
+              ],
               "title": "Type",
               "default": "function"
             },
@@ -2143,7 +2169,9 @@
             },
             "role": {
               "type": "string",
-              "const": "user",
+              "enum": [
+                "user"
+              ],
               "title": "Role"
             },
             "name": {
@@ -2166,7 +2194,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Model"
@@ -2191,7 +2219,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Truncate Prompt Tokens"
@@ -2202,7 +2230,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "User"
@@ -2213,7 +2241,7 @@
   
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Additional Data"
@@ -2240,7 +2268,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Model"
@@ -2272,7 +2300,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Prompt"
@@ -2291,7 +2319,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Prompt Embeds"
@@ -2302,7 +2330,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Best Of"
@@ -2313,7 +2341,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Echo",
@@ -2325,7 +2353,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Frequency Penalty",
@@ -2340,7 +2368,7 @@
                   "type": "object"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Logit Bias"
@@ -2351,7 +2379,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Logprobs"
@@ -2362,7 +2390,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Max Tokens",
@@ -2379,7 +2407,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Presence Penalty",
@@ -2393,7 +2421,7 @@
                   "minimum": -9.223372036854776e+18
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Seed"
@@ -2410,7 +2438,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Stop",
@@ -2422,7 +2450,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Stream",
@@ -2434,7 +2462,7 @@
                   "$ref": "#/components/schemas/StreamOptions"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ]
             },
@@ -2444,7 +2472,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Suffix"
@@ -2455,7 +2483,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Temperature"
@@ -2466,7 +2494,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Top P"
@@ -2477,7 +2505,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "User"
@@ -2493,7 +2521,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Top K"
@@ -2504,7 +2532,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Min P"
@@ -2515,7 +2543,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Repetition Penalty"
@@ -2534,7 +2562,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Stop Token Ids",
@@ -2572,7 +2600,7 @@
                   "minimum": 1
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Truncate Prompt Tokens"
@@ -2586,7 +2614,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Allowed Token Ids"
@@ -2597,7 +2625,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Prompt Logprobs"
@@ -2617,7 +2645,7 @@
                   "$ref": "#/components/schemas/StructuralTagResponseFormat"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Response Format",
@@ -2636,7 +2664,7 @@
                   "$ref": "#/components/schemas/BaseModel"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Guided Json",
@@ -2648,7 +2676,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Guided Regex",
@@ -2663,7 +2691,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Guided Choice",
@@ -2675,7 +2703,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Guided Grammar",
@@ -2687,7 +2715,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Guided Decoding Backend",
@@ -2699,7 +2727,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Guided Whitespace Pattern",
@@ -2727,7 +2755,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Logits Processors",
@@ -2739,7 +2767,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Return Tokens As Token Ids",
@@ -2752,7 +2780,7 @@
                   "type": "object"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Kv Transfer Params",
@@ -2872,7 +2900,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Tool Call Id"
@@ -2886,7 +2914,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Tool Calls"
@@ -2907,7 +2935,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Model"
@@ -2935,7 +2963,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Model"
@@ -2984,7 +3012,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Dimensions"
@@ -2995,7 +3023,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "User"
@@ -3007,7 +3035,7 @@
                   "minimum": -1
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Truncate Prompt Tokens"
@@ -3018,7 +3046,7 @@
   
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Additional Data"
@@ -3035,7 +3063,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Chat Template",
@@ -3048,7 +3076,7 @@
                   "type": "object"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Chat Template Kwargs",
@@ -3061,7 +3089,7 @@
                   "type": "object"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Mm Processor Kwargs",
@@ -3089,7 +3117,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Model"
@@ -3138,7 +3166,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Dimensions"
@@ -3149,7 +3177,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "User"
@@ -3161,7 +3189,7 @@
                   "minimum": -1
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Truncate Prompt Tokens"
@@ -3172,7 +3200,7 @@
   
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Additional Data"
@@ -3218,7 +3246,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Param"
@@ -3244,7 +3272,9 @@
             },
             "type": {
               "type": "string",
-              "const": "file",
+              "enum": [
+                "file"
+              ],
               "title": "Type"
             }
           },
@@ -3321,7 +3351,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Description"
@@ -3333,7 +3363,7 @@
                   "type": "object"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Parameters"
@@ -3415,7 +3445,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Description"
@@ -3427,7 +3457,7 @@
                   "type": "object"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Schema"
@@ -3438,7 +3468,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Strict"
@@ -3466,7 +3496,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Args"
@@ -3478,7 +3508,7 @@
                   "type": "object"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Kwargs"
@@ -3499,7 +3529,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Model"
@@ -3526,7 +3556,7 @@
                   "minimum": -1
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Truncate Prompt Tokens"
@@ -3537,7 +3567,7 @@
   
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Additional Data"
@@ -3574,7 +3604,7 @@
                   "$ref": "#/components/schemas/JsonSchemaResponseFormat"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ]
             }
@@ -3594,7 +3624,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Model"
@@ -3634,7 +3664,7 @@
                   "minimum": -1
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Truncate Prompt Tokens"
@@ -3645,7 +3675,7 @@
   
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Additional Data"
@@ -3673,7 +3703,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Include Usage",
@@ -3685,7 +3715,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Continuous Usage Stats",
@@ -3709,7 +3739,7 @@
                   "type": "object"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Schema"
@@ -3731,7 +3761,9 @@
           "properties": {
             "type": {
               "type": "string",
-              "const": "structural_tag",
+              "enum": [
+                "structural_tag"
+              ],
               "title": "Type"
             },
             "structures": {
@@ -3766,7 +3798,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Model"
@@ -3812,7 +3844,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Return Token Strs",
@@ -3837,7 +3869,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Chat Template",
@@ -3850,7 +3882,7 @@
                   "type": "object"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Chat Template Kwargs",
@@ -3863,7 +3895,7 @@
                   "type": "object"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Mm Processor Kwargs",
@@ -3878,7 +3910,7 @@
                   "type": "array"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Tools",
@@ -3900,7 +3932,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Model"
@@ -3921,7 +3953,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Return Token Strs",
@@ -3949,7 +3981,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Model"
@@ -3960,7 +3992,7 @@
                   "type": "string"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Language"
@@ -4000,7 +4032,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Stream",
@@ -4012,7 +4044,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Stream Include Usage",
@@ -4024,7 +4056,7 @@
                   "type": "boolean"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Stream Continuous Usage Stats",
@@ -4041,7 +4073,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Top P"
@@ -4052,7 +4084,7 @@
                   "type": "integer"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Top K"
@@ -4063,7 +4095,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Min P"
@@ -4076,7 +4108,7 @@
                   "minimum": -9.223372036854776e+18
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Seed"
@@ -4087,7 +4119,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Frequency Penalty",
@@ -4099,7 +4131,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Repetition Penalty"
@@ -4110,7 +4142,7 @@
                   "type": "number"
                 },
                 {
-                  "type": "null"
+                  "nullable": true
                 }
               ],
               "title": "Presence Penalty",
