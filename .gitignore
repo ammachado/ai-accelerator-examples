@@ -5,8 +5,9 @@ manifest.yaml
 venv/
 dictionary.dic
 tmp/
-charts/*.tgz
+**/charts/*.tgz
 .vscode/
+kubeconfig
 
 # Sealed secret key
 bootstrap/base/sealed-secrets-secret.yaml

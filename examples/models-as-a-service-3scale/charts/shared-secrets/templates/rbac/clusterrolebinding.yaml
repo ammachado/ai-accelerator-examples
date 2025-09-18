@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: maas-3scale-external-secrets-read-any-secret-binding
+  labels:
+    rhoai-example: maas-3scale
+    rhoai-example-component: shared-secrets
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: maas-3scale-external-secrets-read-any-secret
+subjects:
+  - kind: ServiceAccount
+    name: maas-3scale-shared-secrets
+    namespace: maas-3scale-shared-secrets

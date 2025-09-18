@@ -1,0 +1,18 @@
+# apiVersion: cert-manager.io/v1
+# kind: Certificate
+# metadata:
+#   name: keycloak-tls-cert
+#   namespace: rhbk
+#   annotations:
+#     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+#   labels:
+#     argocd.argoproj.io/skip-dry-run: "true"
+#     rhoai-example: maas-3scale
+#     rhoai-example-component: shared-secrets
+# spec:
+#   secretName: keycloak-tls-secret
+#   issuerRef:
+#     name: letsencrypt-production-ec2
+#     kind: ClusterIssuer
+#   dnsNames:
+#     - rhbk.{{ .Values.clusterDomainUrl }}

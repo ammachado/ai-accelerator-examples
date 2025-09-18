@@ -2,9 +2,12 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: 3scale-operator
+  namespace: 3scale
+  labels:
+    rhoai-example-component: 3scale
 spec:
   channel: threescale-2.15
   installPlanApproval: Automatic
-  name: redhat-operators
+  name: 3scale-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace

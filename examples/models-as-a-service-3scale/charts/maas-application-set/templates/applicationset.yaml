@@ -1,0 +1,174 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: '{{ .Values.name }}'
+  namespace: openshift-gitops
+  labels:
+    rhoai-example: maas-3scale
+    rhoai-example-component: bootstrap
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          # Sync Wave 0: Operators
+          - name: external-secrets-operator
+            path: components/openshift-external-secrets-operator
+            namespace: external-secrets
+            type: operator
+
+          - name: 3scale-operator
+            path: components/3scale-operator
+            namespace: 3scale
+            type: operator
+
+          - name: rhbk-operator
+            path: components/rhbk-operator
+            namespace: rhbk
+            type: operator
+
+          # Sync Wave 1: Missing Namespaces
+          - name: app-namespaces
+            path: components/namespaces
+            namespace: openshift-gitops
+            type: namespaces
+
+          # Sync Wave 2: Shared secrets setup
+          - name: shared-secrets
+            path: charts/shared-secrets
+            namespace: maas-3scale-shared-secrets
+            type: shared-config
+            chartType: helm
+
+          # # Sync Wave 3: Dependencies
+          # - name: minio
+          #   path: charts/minio
+          #   namespace: minio
+          #   type: dependency
+          #   chartType: helm
+
+          # - name: rhbk-instance
+          #   path: charts/rhbk-instance
+          #   namespace: rhbk
+          #   type: dependency
+          #   chartType: helm
+
+          # - name: model-serving
+          #   path: charts/model-serving
+          #   namespace: llm-hosting
+          #   type: core-app
+          #   chartType: helm
+
+          # # Sync Wave 4: Core Application
+          # - name: 3scale-instance
+          #   path: charts/3scale-instance
+          #   namespace: 3scale
+          #   type: core-app
+          #   chartType: helm
+          #   valueFiles:
+          #     - values.yaml
+          #     - helm-apis-values.yaml
+          #   values:
+          #     {{/*- toYaml .Values.threeScale | nindent 14 */}}
+
+          # # Sync Wave 5: Content and Configuration
+          # - name: 3scale-devportal-upload
+          #   path: charts/cms-upload
+          #   namespace: 3scale
+          #   type: content
+          #   chartType: helm
+          #   values:
+          #     cmsUpload:
+          #       contextDir: devportal
+  strategy:
+    type: RollingSync
+    deletionOrder: Reverse
+    rollingSync:
+      steps:
+        # Step 0: Deploy operators first and wait for all of them to be ready
+        - matchExpressions:
+            - key: rhoai-example-deployment-phase
+              operator: In
+              values:
+                - operator
+
+        # Step 1: Create missingnamespaces
+        - matchExpressions:
+            - key: rhoai-example-deployment-phase
+              operator: In
+              values:
+                - namespaces
+
+          # Wait for shared secrets to be available
+        - matchExpressions:
+            - key: rhoai-example-deployment-phase
+              operator: In
+              values:
+                - shared-config
+
+          # Wait for supporting applications
+        - matchExpressions:
+            - key: rhoai-example-deployment-phase
+              operator: In
+              values:
+                - dependency
+
+          # Wait for infrastructure components to be healthy
+        - matchExpressions:
+            - key: rhoai-example-deployment-phase
+              operator: In
+              values:
+                - core-app
+
+          # Deploy content and configuration
+        - matchExpressions:
+            - key: rhoai-example-deployment-phase
+              operator: In
+              values:
+                - content
+  template:
+    metadata:
+      name: '{{`{{.name}}`}}'
+      labels:
+        rhoai-example: maas-3scale
+        rhoai-example-component: bootstrap
+        rhoai-example-deployment-phase: '{{`{{.type}}`}}'
+    spec:
+      project: models-as-a-service-3scale
+      source:
+        repoURL: {{ .Values.repoURL }}
+        targetRevision: {{ .Values.targetRevision }}
+        path: 'examples/models-as-a-service-3scale/{{`{{.path}}`}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{`{{.namespace}}`}}'
+      syncPolicy:
+        retry:
+          limit: 5
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
+          - SkipDryRunOnMissingResource=true
+          - Validate=true
+          - PruneLast=true
+  templatePatch: |
+    {{`{{- if eq (dig "chartType" "kustomize" .) "helm" }}`}}
+    spec:
+      source:
+        helm:
+          parameters:
+            - name: clusterDomainUrl
+              value: {{ .Values.clusterDomainUrl }}
+          {{`{{- if dig "valueFiles" "" . }}`}}
+          valueFiles:
+          {{`{{- toYaml .valueFiles | nindent 12 }}`}}
+          {{`{{- else }}`}}
+          valueFiles:
+            - values.yaml
+          {{`{{- end }}`}}
+          {{`{{- if dig "values" "" . }}`}}
+          values: |
+            {{`{{- toYaml .values | nindent 12 }}`}}
+          {{`{{- end }}`}}
+    {{`{{- end }}`}}

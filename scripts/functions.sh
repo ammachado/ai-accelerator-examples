@@ -47,18 +47,28 @@ is_debug_enabled() {
 
 # Patch ArgoCD instance to avoid 3scale operator race conditions
 # See https://access.redhat.com/solutions/6989746 for more details
+# Also enables progressive syncs for ArgoCD ApplicationSet controller
 patch_argocd_instance_if_needed() {
-    local ARGOCD_SYNC_WAVE_DELAY
-    ARGOCD_SYNC_WAVE_DELAY=$(oc get argocd/openshift-gitops -n openshift-gitops -o json | jq '.spec?.controller?.env[]? | select(.name == "ARGOCD_SYNC_WAVE_DELAY") | .value')
+    # local ARGOCD_SYNC_WAVE_DELAY
+    # ARGOCD_SYNC_WAVE_DELAY=$(oc get argocd/openshift-gitops -n openshift-gitops -o json | jq '.spec?.controller?.env[]? | select(.name == "ARGOCD_SYNC_WAVE_DELAY") | .value')
 
-    if [ -z "$ARGOCD_SYNC_WAVE_DELAY" ]; then
-        echo "ARGOCD_SYNC_WAVE_DELAY is not set. Setting it to 5 seconds."
+    # if [ -z "$ARGOCD_SYNC_WAVE_DELAY" ]; then
+    #     echo "ARGOCD_SYNC_WAVE_DELAY is not set. Setting it to 5 seconds."
 
+    #     oc patch argocd/openshift-gitops -n openshift-gitops \
+    #         --type=json -p='[{"op": "add", "path": "/spec/controller/env", "value": [{ "name": "ARGOCD_SYNC_WAVE_DELAY", "value": "5" }]}]'
+
+    #     # ArgoCD instance will restart automatically.
+    #     echo "ArgoCD instance patched."
+    # fi
+
+    local PROGRESSIVE_SYNCS
+    PROGRESSIVE_SYNCS=$(oc get argocd/openshift-gitops -n openshift-gitops -o json | jq '.spec?.applicationSet?.env[]? | select(.name == "ARGOCD_APPLICATIONSET_CONTROLLER_ENABLE_PROGRESSIVE_SYNCS") | .value')
+
+    if [ -z "$PROGRESSIVE_SYNCS" ]; then
+        echo "Enabling progressive syncs for ArgoCD ApplicationSet controller..."
         oc patch argocd/openshift-gitops -n openshift-gitops \
-            --type=json -p='[{"op": "add", "path": "/spec/controller/env", "value": [{ "name": "ARGOCD_SYNC_WAVE_DELAY", "value": "5" }]}]'
-
-        # ArgoCD instance will restart automatically.
-        echo "ArgoCD instance patched."
+            --type=json -p='[{"op": "add", "path": "/spec/applicationSet/env", "value": [{ "name": "ARGOCD_APPLICATIONSET_CONTROLLER_ENABLE_PROGRESSIVE_SYNCS", "value": "true" }]}]'
     fi
 }
 

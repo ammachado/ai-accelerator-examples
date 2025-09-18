@@ -1,0 +1,11 @@
+repoURL: https://github.com/ammachado/ai-accelerator-examples.git
+targetRevision: mlaas-gitops-renamed
+
+name: 3scale-maas
+
+# 3scale-specific configuration
+threeScale:
+  apimanager:
+    storageClassName: ""
+
+clusterDomainUrl: apps.cluster-jbkmg.jbkmg.sandbox2083.opentlc.com

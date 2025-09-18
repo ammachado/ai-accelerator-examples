@@ -28,22 +28,22 @@ Before you begin, ensure you have the following:
 *   The following command-line tools installed locally:
     *   `oc`
     *   `git`
-    *   `jq`
-    *   `yq`
 
 Note: A quick way to get most of this configured via gitops is to use the [ai-accelerator](https://github.com/redhat-ai-services/ai-accelerator) github project. The Openshift Gitops operator and RHOAI and related operators are configured for you out of the box. However, ODF operator along with a suitable storage system must be applied to the cluster prior to running the ai-accelerator project bootstrapping or you can tweak the ai-accelerator kustomize files or the ai-accelerator bootstrap script so that ODF/StorageSystem gets deployed prior to other MaaS components binding to persistent volumes.
 
 ## Deployment
 
-To deploy this example, clone this repository and run the bootstrap script from the root directory:
+This project uses an ArgoCD ApplicationSet for a fully declarative GitOps workflow.
+
+To deploy this example, clone this repository and apply the ApplicationSet manifest:
 
 ```bash
-./bootstrap.sh
+oc apply -f applicationsets/applicationset.yaml
 ```
 
-Then select the `models-as-a-service-3scale` example from the menu.
+The ApplicationSet will deploy all the necessary components in the correct order using a progressive rollout strategy.
 
-The script will guide you through the following pre-deployment configuration steps:
+### Secret Management
 
 1.  **Git Repository Configuration**: The script will automatically detect your current Git repository URL and branch (in case of fork scenario) to configure the ArgoCD ApplicationSet.
 2.  **Commit and Push**: You will be prompted to commit and push these configuration changes to your repository. This step is required for the GitOps-based deployment to work correctly. The script uses a Git credential helper to cache your credentials temporarily.

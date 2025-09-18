@@ -1,0 +1,6 @@
+dependencies:
+- name: minio
+  repository: https://redhat-ai-services.github.io/helm-charts/
+  version: 0.1.2
+digest: sha256:cc6540cfaaa6aeb15d1151bd5e63b0007159e8394319d09442fa32dedee01991
+generated: "2025-09-11T01:09:54.277453-04:00"

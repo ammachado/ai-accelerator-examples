@@ -1,0 +1,1 @@
+./examples/models-as-a-service-3scale/remove-example.sh

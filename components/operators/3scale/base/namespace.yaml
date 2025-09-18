@@ -7,3 +7,4 @@ metadata:
     openshift.io/display-name: "3scale"
   labels:
     openshift.io/cluster-monitoring: 'true'
+    rhoai-example-component: 3scale

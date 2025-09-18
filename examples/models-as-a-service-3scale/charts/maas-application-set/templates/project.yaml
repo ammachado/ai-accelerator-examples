@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: '{{ .Values.name }}'
+  namespace: openshift-gitops
+  labels:
+    rhoai-example: maas-3scale
+    rhoai-example-component: bootstrap
+spec:
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  destinations:
+    - namespace: '*'
+      server: '*'
+  sourceRepos:
+    - '{{ .Values.repoURL }}'

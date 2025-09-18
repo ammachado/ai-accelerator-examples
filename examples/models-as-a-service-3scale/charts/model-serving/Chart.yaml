@@ -1,0 +1,10 @@
+apiVersion: v2
+name: model-serving
+description: A Helm chart for model serving
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+dependencies:
+- name: vllm-kserve
+  version: 0.5.10
+  repository: https://redhat-ai-services.github.io/helm-charts/

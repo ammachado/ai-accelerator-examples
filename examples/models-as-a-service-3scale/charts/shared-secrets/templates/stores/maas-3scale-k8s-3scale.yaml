@@ -1,0 +1,28 @@
+# This store is used to read secrets from the openshift-config namespace in the cluster
+# It uses a service account in the external-secrets namespace to authenticate, so the consumers don't need
+# to have permissions to read from that namespace.
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: maas-3scale-k8s-3scale
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    rhoai-example: maas-3scale
+    rhoai-example-component: shared-secrets
+spec:
+  provider:
+    kubernetes:
+      auth:
+        serviceAccount:
+          name: maas-3scale-shared-secrets
+          namespace: maas-3scale-shared-secrets
+      remoteNamespace: 3scale
+      server:
+        caProvider:
+          key: ca.crt
+          name: kube-root-ca.crt
+          ## TODO: Update to the correct namespace when using openshift-external-secrets-operator
+          namespace: openshift-operators
+          type: ConfigMap
+        url: kubernetes.default.svc

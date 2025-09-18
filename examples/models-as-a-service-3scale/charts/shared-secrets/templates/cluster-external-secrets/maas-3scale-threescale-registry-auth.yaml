@@ -1,0 +1,41 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterExternalSecret
+metadata:
+  name: maas-3scale-threescale-registry-auth
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    rhoai-example: maas-3scale
+    rhoai-example-component: shared-secrets
+spec:
+  namespaceSelectors:
+    - matchLabels:
+        rhoai-example-component: 3scale
+  refreshTime: 1h
+  externalSecretName: threescale-registry-auth
+  externalSecretMetadata:
+    labels:
+      rhoai-example: maas-3scale
+      rhoai-example-component: shared-secrets
+  externalSecretSpec:
+    refreshInterval: 1h
+    secretStoreRef:
+      kind: ClusterSecretStore
+      name: maas-3scale-k8s-openshift-config
+    data:
+      - remoteRef:
+          conversionStrategy: Default
+          decodingStrategy: None
+          key: pull-secret
+          metadataPolicy: None
+          property: .dockerconfigjson
+        secretKey: .dockerconfigjson
+    target:
+      name: threescale-registry-auth
+      template:
+        engineVersion: v2
+        metadata:
+          labels:
+            rhoai-example: maas-3scale
+            rhoai-example-component: shared-secrets
+        type: kubernetes.io/dockerconfigjson

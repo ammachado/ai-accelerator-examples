@@ -1,0 +1,45 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterExternalSecret
+metadata:
+  name: maas-3scale-postgres-db
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    rhoai-example: maas-3scale
+    rhoai-example-component: shared-secrets
+spec:
+  namespaceSelectors:
+    - matchLabels:
+        rhoai-example-component: rhbk
+  refreshTime: 0s
+  externalSecretName: postgres-db
+  externalSecretMetadata:
+    labels:
+      rhoai-example: maas-3scale
+      rhoai-example-component: shared-secrets
+  externalSecretSpec:
+    refreshInterval: "0s"
+    dataFrom:
+      - sourceRef:
+          generatorRef:
+            apiVersion: generators.external-secrets.io/v1alpha1
+            kind: ClusterGenerator
+            name: maas-3scale-password-generator
+        rewrite:
+          - regexp:
+              source: password
+              target: POSTGRESQL_PASSWORD
+    target:
+      creationPolicy: Owner
+      deletionPolicy: Retain
+      name: postgres-db
+      immutable: true
+      template:
+        engineVersion: v2
+        metadata:
+          labels:
+            rhoai-example: maas-3scale
+            rhoai-example-component: shared-secrets
+        data:
+            POSTGRESQL_USER: rhbk
+            POSTGRESQL_PASSWORD: '{{`{{ .POSTGRESQL_PASSWORD | b64enc }}`}}'

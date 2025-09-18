@@ -1,0 +1,3 @@
+- op: add
+  path: /spec/generators/0/list/elements/8/values/apimanager/storageClassName
+  value: ocs-storagecluster-cephfs

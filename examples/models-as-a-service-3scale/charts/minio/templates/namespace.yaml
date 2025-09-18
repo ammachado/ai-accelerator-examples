@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+    openshift.io/description: "MinIO S3-compatible object storage"
+    openshift.io/display-name: "MinIO"
+  labels:
+    openshift.io/cluster-monitoring: 'true'
+    rhoai-example-component: minio

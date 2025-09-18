@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: maas-3scale-shared-secrets
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+    openshift.io/description: "3scale Model as a Service - Shared Secrets"
+    openshift.io/display-name: "maas-3scale-shared-secrets"
+  labels:
+    rhoai-example: maas-3scale
+    rhoai-example-component: shared-secrets

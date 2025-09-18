@@ -3,6 +3,8 @@ kind: OperatorGroup
 metadata:
   name: 3scale-og
   namespace: 3scale
+  labels:
+    rhoai-example-component: 3scale
 spec:
   targetNamespaces:
     - 3scale

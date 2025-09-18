@@ -1,0 +1,37 @@
+# This is to override the chart name.
+fullnameOverride: "minio"
+
+persistence:
+  # -- Size of the PVC
+  size: 1Gi
+
+credentials:
+  existingSecret: s3-credentials
+  generateSecret: false
+  minioUserKey: AWS_ACCESS_KEY_ID
+  minioPasswordKey: AWS_SECRET_ACCESS_KEY
+
+apiRoute:
+  # -- Enable creation of the OpenShift Route object
+  enabled: false
+
+# This is for setting Kubernetes Annotations to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+podAnnotations:
+  argocd.argoproj.io/sync-wave: "0"
+
+# This is for setting Kubernetes Labels to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+mcImage:
+  repository: quay.io/minio/mc
+  tag: latest
+
+minio:
+  url: http://minio.minio.svc:9000
+  secret:
+    name: minio
+    accessKey: AWS_ACCESS_KEY_ID
+    secretKey: AWS_SECRET_ACCESS_KEY
+  bucket: 3scale-maas

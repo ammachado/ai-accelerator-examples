@@ -2,7 +2,7 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: external-secrets-operator
-  namespace: openshift-operators
+  namespace: external-secrets-operator
 spec:
   channel: patch-me-in-overlay
   installPlanApproval: Automatic

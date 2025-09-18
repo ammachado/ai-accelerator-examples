@@ -1,0 +1,10 @@
+# Default values for Keycloak instance
+namespace: rhbk
+keycloak:
+  name: maas-3scale-rhbk
+  realm:
+    name: 3scale-maas
+    displayName: "RHOAI MaaS on 3scale"
+
+# clusterDomainUrl: The cluster apps wildcard domain. If not set or set to the placeholder, a post-install job will try to detect it automatically from Routes.
+clusterDomainUrl: "Needtopatchit"

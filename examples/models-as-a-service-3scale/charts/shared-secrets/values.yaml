@@ -1,0 +1,3 @@
+namespace: maas-3scale-shared-secrets
+
+clusterDomainUrl: cluster.local

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: maas-application-set
+description: A Helm chart to deploy the 3scale Model as a Service example
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

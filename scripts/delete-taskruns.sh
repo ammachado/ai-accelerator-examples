@@ -16,5 +16,5 @@ else
 fi
 done
 
-oc get pipelinerun -n "$NAMESPACE" -l rhoai-example=maas -o name | xargs oc delete -n "$NAMESPACE"
-oc get taskrun -n "$NAMESPACE" -l rhoai-example=maas -o name | xargs oc delete -n "$NAMESPACE"
+oc get pipelinerun -n "$NAMESPACE" -l rhoai-example=maas-3scale -o name | xargs oc delete -n "$NAMESPACE"
+oc get taskrun -n "$NAMESPACE" -l rhoai-example=maas-3scale -o name | xargs oc delete -n "$NAMESPACE"
