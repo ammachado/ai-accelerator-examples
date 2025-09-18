@@ -19,6 +19,7 @@ spec:
       valuesObject:
         namespace: {{ .Values.threeScale.namespace }}
         apimanager:
+          wildcardDomain: {{ .Values.clusterDomainUrl }}
           storageClassName: {{ .Values.threeScale.storageClassName }}
   destination:
     namespace: {{ .Values.threeScale.namespace }}

@@ -46,7 +46,7 @@ spec:
               value: {{ .Values.repoURL }}
             - name: targetRevision
               value: {{ .Values.targetRevision }}
-          values: |
+          valuesObject:
             namespace: {{ .Release.Namespace }}
       destination:
         server: https://kubernetes.default.svc

@@ -54,4 +54,14 @@ spec:
           secretRef:
              name: {{ .Values.apimanager.llmMetrics.name }}
   {{- end }}
+    productionSpec:
+      labels:
+        {{- include "3scale.labels" . | nindent 8 }}
+  {{ if .Values.apimanager.llmMetrics }}
+      customPolicies:
+        - name: {{ .Values.apimanager.llmMetrics.name }}
+          version: "{{ .Values.apimanager.llmMetrics.version }}"
+          secretRef:
+             name: {{ .Values.apimanager.llmMetrics.name }}
+  {{- end }}
   {{- end }}
