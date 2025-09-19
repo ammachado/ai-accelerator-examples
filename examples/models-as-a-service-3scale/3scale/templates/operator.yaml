@@ -5,6 +5,8 @@ kind: OperatorGroup
 metadata:
   name: {{ .Values.operator.name }}-group
   namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   targetNamespaces:
     - {{ .Values.namespace }}
@@ -14,13 +16,12 @@ kind: Subscription
 metadata:
   name: {{ .Values.operator.name }}
   namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   channel: {{ .Values.operator.channel }}
   installPlanApproval: {{ .Values.operator.installPlanApproval }}
   name: {{ .Values.operator.name }}
   source: {{ .Values.operator.source }}
   sourceNamespace: {{ .Values.operator.sourceNamespace }}
-  {{- if .Values.operator.startingCSV }}
-  startingCSV: {{ .Values.operator.startingCSV }}
-  {{- end }}
 {{- end }}

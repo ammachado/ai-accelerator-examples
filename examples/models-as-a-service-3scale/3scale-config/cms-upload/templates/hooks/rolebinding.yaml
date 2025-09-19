@@ -10,6 +10,8 @@ metadata:
     {{- else }}
     "helm.sh/hook": pre-install
     {{- end }}
+  labels:
+    {{- include "cms-upload.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -18,4 +20,4 @@ subjects:
 - apiGroup: ""
   kind: ServiceAccount
   name: {{ include "cms-upload.name" . }}-hook
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.namespace }}

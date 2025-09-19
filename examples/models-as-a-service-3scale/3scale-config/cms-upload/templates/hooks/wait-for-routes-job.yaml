@@ -3,14 +3,15 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "cms-upload.name" . }}-hook-pre
-  labels:
-    {{- include "cms-upload.labels" . | nindent 4 }}
+  namespace: {{ .Values.namespace }}
   annotations: 
     {{- if .Values.hook.pre.argocd.enabled }}
     {{- include "cms-upload-hook-pre.argocd-syncwave" . | nindent 4 }}
     {{- else }}
     "helm.sh/hook": pre-install
     {{- end }}
+  labels:
+    {{- include "cms-upload.labels" . | nindent 4 }}
 spec:
   selector: {}
   template:

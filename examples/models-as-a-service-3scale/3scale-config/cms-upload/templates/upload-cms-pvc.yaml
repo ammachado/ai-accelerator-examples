@@ -3,12 +3,15 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: workspace-upload-cms-pvc
+  namespace: {{ .Values.namespace }}
   annotations: 
     {{- if .Values.hook.post.argocd.enabled }}
     {{- include "cms-upload-hook-post.argocd-syncwave" . | nindent 4 }}
     {{- else }}
     "helm.sh/hook": post-install
     {{- end }}
+  labels:
+    {{- include "cms-upload.labels" . | nindent 4 }}
 spec:
   accessModes:
   - ReadWriteOnce

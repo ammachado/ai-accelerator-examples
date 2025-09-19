@@ -3,6 +3,12 @@ kind: Kustomization
 
 namespace: minio
 
+labels:
+  - pairs:
+      component: aiworkshop
+      rhoai-example: maas-3scale
+      rhoai-example-component: minio-instance
+
 resources:
   - namespace.yaml
 

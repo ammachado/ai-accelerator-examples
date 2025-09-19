@@ -8,6 +8,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "99"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   name: {{ .name }}
   description: 'Application for {{ .name }}'
@@ -25,6 +27,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "100"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   applicationCRName: {{ .name }}
   generateSecret: true

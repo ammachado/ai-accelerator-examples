@@ -31,6 +31,14 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Selector labels
+*/}}
+{{- define "maas-bootstrap.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "maas-bootstrap.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Common labels
 */}}
 {{- define "maas-bootstrap.labels" -}}
@@ -40,4 +48,6 @@ helm.sh/chart: {{ include "maas-bootstrap.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+rhoai-example: maas-3scale
+rhoai-example-component: bootstrap
 {{- end }}

@@ -1,3 +1,6 @@
+apimanager:
+  tenantName: maas
+
 hook:
   pre:
     image:

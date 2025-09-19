@@ -3,6 +3,9 @@ apiVersion: tekton.dev/v1
 kind: Task
 metadata:
   name: 3scale-cms
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "cms-upload.labels" . | nindent 4 }}
 spec:
   description: >-
     3scale-cms task to interact with the 3scale Content Management API

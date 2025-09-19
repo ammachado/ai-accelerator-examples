@@ -8,6 +8,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "4"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   name: "{{ .name }}"
   systemName: "{{ .name }}"
@@ -23,6 +25,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   name: "{{ .name }}"
   systemName: "{{ .name }}"
@@ -63,6 +67,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "6"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   name: "{{ .name }}"
   systemName: {{ include "3scale.systemName" .name }}
@@ -86,6 +92,8 @@ kind: Secret
 metadata:
   name: {{ .name }}-activedoc
   namespace: {{ $.Values.namespace }}
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 type: Opaque
 data:
 {{- if ne (trimSuffix ".json" $activeDocOpenAPIFile) $activeDocOpenAPIFile }}
@@ -103,6 +111,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "9"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- include "3scale.labels" . | nindent 4 }}
 spec:
   productCRName: {{ .name }}
   production: true

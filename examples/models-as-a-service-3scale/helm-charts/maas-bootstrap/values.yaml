@@ -8,11 +8,13 @@ clusterDomainUrl: apps.cluster-guid.guid.sandbox.opentlc.com
 repoURL: https://github.com/redhat-ai-services/ai-accelerator-examples.git
 targetRevision: main
 
+apimanager:
+  tenantName: maas
+
 threeScale:
   namespace: 3scale
   path: examples/models-as-a-service-3scale/3scale
   channel: threescale-2.15
-  startingCSV: 3scale-operator.v0.12.4
   storageClassName: "ocs-storagecluster-cephfs"
 
 cmsUpload:
@@ -20,6 +22,7 @@ cmsUpload:
   contextDir: examples/models-as-a-service-3scale/3scale-config
 
 minio:
+  namespace: minio
   path: examples/models-as-a-service-3scale/minio-instance
 
 llmaas:

@@ -4,6 +4,8 @@ kind: Application
 metadata:
   name: 3scale
   namespace: {{ .Values.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "maas-bootstrap.labels" . | nindent 4 }}
 spec:
   project: {{ include "maas-bootstrap.fullname" . }}
   source:

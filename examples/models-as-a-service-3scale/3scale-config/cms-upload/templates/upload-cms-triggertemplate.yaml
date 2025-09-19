@@ -3,6 +3,9 @@ apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
   name: upload-cms-template
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "cms-upload.labels" . | nindent 4 }}
 spec:
   params:
     - description: The git repository.

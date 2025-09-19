@@ -3,6 +3,9 @@ apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
   name: upload-cms-binding
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "cms-upload.labels" . | nindent 4 }}
 spec:
   params:
     - name: gitRepository
